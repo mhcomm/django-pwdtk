@@ -1,0 +1,65 @@
+.cache: &cache
+  cache:
+    key: "$CI_BUILD_REF_NAME"
+    paths:
+      - eenv/
+      - eenv3/
+
+stages:
+    - lint
+    - test
+
+variables:
+  GIT_SUBMODULE_STRATEGY: none
+
+before_script:
+    - "[ -s '$HOME/.gitlab_runner.sh' ] && $HOME/.gitlab_runner.sh"
+    - "[ -s 'eenv/bin/activate' ] || virtualenv eenv"
+    - "[ -s 'eenv3/bin/activate' ] || virtualenv eenv3 -p $(which python3.5 | which python3)"
+    - git submodule sync --recursive
+    - git submodule foreach --recursive git clean -fxd
+    - git submodule update --init --recursive --force
+    # for debugging some weird issues on some ci runners
+    - locale
+
+# ############################################################################
+# lint stage
+# ############################################################################
+
+flake2:
+  tags:
+    - shell
+  stage: lint
+  allow_failure: false
+  script:
+    - "[ -s 'eenv/bin/activate' ] && . eenv/bin/activate"
+    - python -V
+    - pip install -U flake8
+    - python -m flake8 pwdtk
+
+
+flake3:
+  tags:
+    - shell
+  stage: lint
+  allow_failure: false
+  script:
+    - "[ -s 'eenv3/bin/activate' ] && . eenv3/bin/activate"
+    - python -V
+    - pip install -U flake8
+    - python -m flake8 pwdtk
+
+
+
+# ############################################################################
+# Test stage
+# ############################################################################
+test:
+  tags:
+    - shell
+  stage: test
+  allow_failure: false
+  script:
+    - python -V
+    - tox
+
