@@ -82,8 +82,13 @@ def test_login(two_users):
     do_login(client, data)
     do_logout(client)
 
+    failure_limit = settings.PWDTK_USER_FAILURE_LIMIT
+    if not failure_limit:
+        logger.debug("PWDTK_USER_FAILURE_LIMIT not set. will skip test")
+        return
+
     # only two bad logins
-    for cnt in range(2):
+    for cnt in range(failure_limit - 1):
         logger.debug("bad login %d", cnt)
         resp = do_login(client, data, use_good_password=False)
         assert resp.status_code == 200
@@ -93,7 +98,7 @@ def test_login(two_users):
 
     do_logout(client)
     # now 3 bad logins
-    for cnt in range(3):
+    for cnt in range(failure_limit):
         logger.debug("bad login %d", cnt)
         resp = do_login(client, data, use_good_password=False)
         assert resp.status_code == 200
