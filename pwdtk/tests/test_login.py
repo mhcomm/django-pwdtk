@@ -7,6 +7,7 @@ import dateutil.parser
 import pytest
 
 from builtins import range
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http.response import HttpResponseRedirect
 from django.test import Client
@@ -14,6 +15,7 @@ from django.test import Client
 from pwdtk.auth_backends_data import UserData
 
 
+AUTH_URL = settings.PWDTK_TEST_ADMIN_URL
 logger = logging.getLogger(__name__)
 
 
@@ -62,7 +64,9 @@ def test_login(two_users):
     username, password = two_users[0]
 
     # go to a login page and fetch csrf token
-    resp = client.get("/admin/login/?next=/admin/")
+    url = AUTH_URL + "login/?next=" + AUTH_URL
+    logger.debug("loginurl = %s", url)
+    resp = client.get(url)
     assert hasattr(resp, 'cookies')
     csrf_token = resp.cookies.get('csrf_token')
     logger.debug("token %r", csrf_token)
@@ -122,7 +126,9 @@ def do_login(client, data, use_good_password=True, shall_pass=None):
     if shall_pass is None:
         shall_pass = use_good_password
 
-    resp = client.post("/admin/login/?next=/admin/", data=data)
+    url = AUTH_URL + "login/?next=" + AUTH_URL
+    logger.debug("loginurl = %s", url)
+    resp = client.post(url, data=data)
     status_code = int(resp.status_code)
 
     if shall_pass:
@@ -130,7 +136,7 @@ def do_login(client, data, use_good_password=True, shall_pass=None):
         assert status_code == 302
         assert resp.has_header('location')
         location = resp['location']
-        assert location.endswith('/admin/')
+        assert location.endswith(settings.PWDTK_TEST_ADMIN_URL)
         logger.debug("login of %r/%r ok as expected",
                      username, password)
     else:
@@ -147,12 +153,12 @@ def do_login(client, data, use_good_password=True, shall_pass=None):
                 logger.debug("%s: %s", key, repr(val))
         assert status_code != 302  # no redirection to targert page
 
-        if resp.status_code == 200:
+        if status_code == 200:
             answer = resp.content
-            assert b'Please enter the correct' in answer
+            assert settings.PWDTK_TEST_LOGIN_FAIL_SUBMSG in answer
         else:
             answer = resp.content
-            assert b'So bad!' in answer
+            assert settings.PWDTK_TEST_LOCKOUT_SUBMSG in answer
 
         data['password'] = password  # restore password
 
@@ -161,6 +167,8 @@ def do_login(client, data, use_good_password=True, shall_pass=None):
 
 def do_logout(client):
     """ helper to logout a user via the admin web form """
-    resp = client.post("/admin/logout/")
-    assert resp.status_code == 200
+    url = AUTH_URL + "logout/"
+    resp = client.post(url)
+    status_code = int(resp.status_code)
+    assert status_code in [200, 302]
     logger.debug("logout successful")
