@@ -31,8 +31,8 @@ ALLOWED_HOSTS = []
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     ]
-# Application definition
 
+# Application definition
 
 
 INSTALLED_APPS = (
@@ -116,3 +116,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 TEST_RUNNER = 'pwdtk.testproject.pytest_runner.PytestTestRunner'
+
+from pwdtk.testproject.logcfg import LOGGING  # noqa: F401

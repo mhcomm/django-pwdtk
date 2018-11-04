@@ -2,9 +2,15 @@ import logging
 
 from django.contrib.auth import get_user_model
 
+from pwdtk.models import PwdData
+
 
 logger = logging.getLogger(__name__)
 logger.debug("######## Imp backend2 data")  # for debugging dj 1.8 -> 1.11
+
+
+class PwdTkError(Exception):
+    """ custom exception """
 
 
 class UserData(object):
@@ -12,27 +18,32 @@ class UserData(object):
 
     def __init__(self, user=None, username=None):
         cls = self.__class__
+
+        User = cls.User
+        if not User:
+            User = cls.User = get_user_model()
+
         if user:
-            self.user = user
+            username = user.username
+        elif username:
+            user = User.objects.get(username=username)
         else:
-            User = cls.User
-            if not cls.User:
-                User = cls.User = get_user_model()
+            msg = "need either user or username"
+            logger.error(msg)
+            raise PwdTkError(msg)
 
-            self.user = user = User.objects.get(username=username)
+        self.user = user
+        pwd_data, created = PwdData.objects.get_or_create(
+            user_id=user.id,
+            defaults={
+                'username': username,
+                'data': {},
+                }
+            )
+        pwd_data.save()
 
-        try:
-            self.user_profile = user.user_profile
-        except Exception:
-            self.user_profile = None
-            self.data = {}
-            logger.warning("problems getting profile for user %s",
-                           user.username)
-            return
-
-        data = self.data = user.user_profile.data.get('pwd_policy') or {}
-        user.user_profile.data['pwd_policy'] = data
-        user.user_profile.save()
+        self.pwd_data = pwd_data
+        self.data = self.pwd_data.data
 
     @property
     def failed_logins(self):
@@ -59,8 +70,8 @@ class UserData(object):
         self.data['fail_time'] = value
 
     def save(self):
-        if self.user_profile:
-            self.user_profile.save()
+        if self.pwd_data:
+            self.pwd_data.save()
 
 
 logger.debug("######## Imped backend2 data")  # for debugging dj 1.8 -> 1.11

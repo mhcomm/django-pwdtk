@@ -3,6 +3,7 @@ from __future__ import absolute_import
 # third party modules
 from setuptools import setup
 install_requires = [
+    'django-jsonfield',
     'future',
     'minibelt',
     'python-dateutil',

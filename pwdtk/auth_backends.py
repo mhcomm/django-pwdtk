@@ -67,7 +67,8 @@ class MHPwdPolicyBackend(object):
         t_fail = dateutil.parser.parse(user_data.fail_time)
         t_delta = datetime.datetime.utcnow() - t_fail
         delta_secs = t_delta.days * 86400 + t_delta.seconds
-        logger.debug("locked %s %s %s", repr(t_fail), repr(t_delta), repr(delta_secs))
+        logger.debug("locked %s %s %s",
+                     repr(t_fail), repr(t_delta), repr(delta_secs))
         if delta_secs < PWDTK_LOCKOUT_TIME:
             logger.debug("still locked")
             return True
@@ -94,7 +95,8 @@ class MHPwdPolicyBackend(object):
             t_delta = datetime.datetime.utcnow() - t_fail
             age = t_delta.days * 86400 + t_delta.seconds
             to_wait = PWDTK_LOCKOUT_TIME - age
-            msg = ("user %s entered bad password too often (%d times) (must wait %d seconds)"
+            msg = ("user %s entered bad password too often (%d times)"
+                   " (must wait %d seconds)"
                    % (username, user_data.failed_logins, to_wait))
             user_data.failed_logins += 1
             user_data.save()
@@ -107,7 +109,8 @@ class MHPwdPolicyBackend(object):
         """
         # TODO: to be implemented
 
-    def authenticate(self, request=None, username=None, password=None, **kwargs):
+    def authenticate(self, request=None, username=None, password=None,
+                     **kwargs):
         logger.debug(
             "############## MHAUTH: %s %s %s %s",
             repr(request), repr(username), repr(password), repr(kwargs))
@@ -139,8 +142,8 @@ class MHPwdPolicyBackend(object):
         data.failed_logins = failed_logins = data.failed_logins + 1
         if failed_logins >= PWDTK_USER_FAILURE_LIMIT:
             data.locked = True
-            logger.warning('User %s got logged out after %d login errors ', username,
-                           PWDTK_USER_FAILURE_LIMIT)
+            logger.warning('User %s got logged out after %d login errors ',
+                           username, PWDTK_USER_FAILURE_LIMIT)
         data.save()
         return failed_logins
 
@@ -185,12 +188,14 @@ def watch_login(login_func):
         respoonse for logged out users.
         This is required for old django versions, that don't receive the
         request object with a user_login_failed signa
+        # TO BE USED FOR PRE-DJANGO 1.11
     """
     # Don't decorate multiple times
     if login_func.__name__ == 'new_login':
         return login_func
 
     def new_login(request, *args, **kwargs):
+        logger.debug("DECO")
         backend = MHPwdPolicyBackend.get_backend()
 
         if request.method != 'POST':
@@ -206,17 +211,61 @@ def watch_login(login_func):
             msg = "arx"
             return lockout_response(request, backend, msg)
 
-        logger.debug("calling login with %s, %s and %s", repr(request), repr(args), repr(kwargs))
+        logger.debug("calling login with %s, %s and %s",
+                     repr(request), repr(args), repr(kwargs))
         rslt = login_func(request, *args, **kwargs)
         logger.debug("login returned %s", repr(rslt))
         return rslt
 
+    logger.debug("decorated the login function")
+
     return new_login
+
+
+def watch_login_dispatch(dispatch_func):
+    """ allows to decorate the login function in order to create a custon
+        respoonse for logged out users.
+        This is required for old django versions, that don't receive the
+        request object with a user_login_failed signa
+    """
+    # Don't decorate multiple times
+    logger.debug("FUNC_NAME: %s", dispatch_func.__name__)
+    if dispatch_func.__name__ == 'new_dispatch':
+        return dispatch_func
+
+    def new_dispatch(self, request, *args, **kwargs):
+        logger.debug("DECOV")
+        backend = MHPwdPolicyBackend.get_backend()
+
+        if request.method != 'POST':
+            return dispatch_func(self, request, *args, **kwargs)
+
+        logger.debug("intercepting POST to dispatch")
+        username = request.POST[PWDTK_USERNAME_FORM_FIELD]
+        try:
+            backend.check_tries_per_user(username)
+            return dispatch_func(self, request, *args, **kwargs)
+        except PermissionDenied as exc:
+            logger.debug("login dispatch blocked %s %s",
+                         repr(exc), repr(vars(exc)))
+            msg = "arx"
+            return lockout_response(request, backend, msg)
+
+        logger.debug("calling login with %s, %s and %s",
+                     repr(request), repr(args), repr(kwargs))
+        rslt = dispatch_func(self, request, *args, **kwargs)
+        logger.debug("login returned %s", repr(rslt))
+        return rslt
+
+    logger.debug("decorated the login function")
+
+    return new_dispatch
 
 
 def seconds_to_iso8601(seconds):
     """ helper to convert seconds to iso string """
-    # split seconds to larger units
+
+    seconds = float(seconds)
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
