@@ -13,7 +13,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: none
 
 before_script:
-    - "[ -s '$HOME/.gitlab_runner.sh' ] && $HOME/.gitlab_runner.sh"
+    - "[ -s \"$HOME/.gitlab_runner.sh\" ] && . $HOME/.gitlab_runner.sh"
     - "[ -s 'eenv/bin/activate' ] || virtualenv eenv"
     - "[ -s 'eenv3/bin/activate' ] || virtualenv eenv3 -p $(which python3.5 | which python3)"
     - git submodule sync --recursive
@@ -21,6 +21,7 @@ before_script:
     - git submodule update --init --recursive --force
     # for debugging some weird issues on some ci runners
     - locale
+    - which python
 
 # ############################################################################
 # lint stage
@@ -35,7 +36,7 @@ flake2:
     - "[ -s 'eenv/bin/activate' ] && . eenv/bin/activate"
     - python -V
     - pip install -U flake8
-    - python -m flake8 pwdtk
+    - python -m flake8 pwdtk --exclude=pwdtk/testproject/manage21.py
 
 
 flake3:
@@ -61,5 +62,6 @@ test:
   allow_failure: false
   script:
     - python -V
+    - pip install -U tox
     - tox
 
