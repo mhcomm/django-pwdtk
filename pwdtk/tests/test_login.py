@@ -12,11 +12,13 @@ from django.contrib.auth import get_user_model
 from django.http.response import HttpResponseRedirect
 from django.test import Client
 
-from pwdtk.auth_backends_data import UserData
+from pwdtk.auth_backends import MHPwdPolicyBackend
 
+
+logger = logging.getLogger(__name__)
 
 AUTH_URL = settings.PWDTK_TEST_ADMIN_URL
-logger = logging.getLogger(__name__)
+UserData = MHPwdPolicyBackend.get_user_data_cls()
 
 
 @pytest.fixture
@@ -35,85 +37,6 @@ def two_users():
         users.append((username, passwd))
 
     return users
-
-
-@pytest.mark.django_db
-def test_login_no_form(two_users):
-    browser = "Mozilla/5.0"
-    client = Client(browser=browser)
-
-    username, password = two_users[0]
-
-    # First successful login without form
-    loggedin = client.login(username=username, password=password)
-    print("%s %s -> %s" % (username, password, loggedin))
-    assert loggedin is True
-
-    # login with bad password fails without form
-    bad_pwd = password + 'a'
-    loggedin = client.login(username=username, password=bad_pwd)
-    print("%s %s -> %s" % (username, bad_pwd, loggedin))
-    assert loggedin is False
-
-
-@pytest.mark.django_db
-def test_login(two_users):
-    browser = "Mozilla/5.0"
-    client = Client(browser=browser)
-
-    username, password = two_users[0]
-
-    # go to a login page and fetch csrf token
-    url = AUTH_URL + "login/?next=" + AUTH_URL
-    logger.debug("loginurl = %s", url)
-    resp = client.get(url)
-    assert hasattr(resp, 'cookies')
-    csrf_token = resp.cookies.get('csrf_token')
-    logger.debug("token %r", csrf_token)
-
-    # prepare post_data
-    data = dict(
-        username=username,
-        password=password,
-        csrfmiddlewaretoken=csrf_token,
-        )
-
-    # login once
-    do_login(client, data)
-    do_logout(client)
-
-    failure_limit = settings.PWDTK_USER_FAILURE_LIMIT
-    if not failure_limit:
-        logger.debug("PWDTK_USER_FAILURE_LIMIT not set. will skip test")
-        return
-
-    # only two bad logins
-    for cnt in range(failure_limit - 1):
-        logger.debug("bad login %d", cnt)
-        resp = do_login(client, data, use_good_password=False)
-        assert resp.status_code == 200
-
-    # Now logging in should still work
-    do_login(client, data)
-
-    do_logout(client)
-    # now 3 bad logins
-    for cnt in range(failure_limit):
-        logger.debug("bad login %d", cnt)
-        resp = do_login(client, data, use_good_password=False)
-        assert resp.status_code == 200
-
-    # Now logging in should fail
-    do_login(client, data, shall_pass=False)
-
-    # now let's check out the lockout delay
-    user_data = UserData(username=username)
-    logger.debug("userdata : %s", repr(user_data.data))
-    assert user_data.locked
-    t_fail = dateutil.parser.parse(user_data.fail_time)
-    now = datetime.datetime.now()
-    delta = now - t_fail
-    logger.debug("AGE %s", delta.seconds)
 
 
 def do_login(client, data, use_good_password=True, shall_pass=None):
@@ -177,3 +100,102 @@ def do_logout(client):
     status_code = int(resp.status_code)
     assert status_code in [200, 302]
     logger.debug("logout successful")
+
+
+@pytest.mark.django_db
+def test_login_no_form(two_users):
+    """ client login without the login url """
+    browser = "Mozilla/5.0"
+    client = Client(browser=browser)
+
+    username, password = two_users[0]
+
+    # First successful login without form
+    loggedin = client.login(username=username, password=password)
+    print("%s %s -> %s" % (username, password, loggedin))
+    assert loggedin is True
+
+    # login with bad password fails without form
+    bad_pwd = password + 'a'
+    loggedin = client.login(username=username, password=bad_pwd)
+    print("%s %s -> %s" % (username, bad_pwd, loggedin))
+    assert loggedin is False
+
+
+@pytest.mark.django_db
+def test_login(two_users):
+    """ login via the login url """
+    browser = "Mozilla/5.0"
+    client = Client(browser=browser)
+
+    username, password = two_users[0]
+
+    # go to a login page and fetch csrf token
+    url = AUTH_URL + "login/?next=" + AUTH_URL
+    logger.debug("loginurl = %s", url)
+    resp = client.get(url)
+    assert hasattr(resp, 'cookies')
+    csrf_token = resp.cookies.get('csrf_token')
+    logger.debug("token %r", csrf_token)
+
+    # prepare post_data
+    data = dict(
+        username=username,
+        password=password,
+        csrfmiddlewaretoken=csrf_token,
+        )
+
+    # login once
+    do_login(client, data)
+    do_logout(client)
+
+    failure_limit = settings.PWDTK_USER_FAILURE_LIMIT
+    if not failure_limit:
+        logger.debug("PWDTK_USER_FAILURE_LIMIT not set. will skip test")
+        return
+
+    # only two bad logins
+    for cnt in range(failure_limit - 1):
+        logger.debug("bad login %d", cnt)
+        resp = do_login(client, data, use_good_password=False)
+        assert resp.status_code == 200
+
+    # Now logging in should still work
+    do_login(client, data)
+
+    do_logout(client)
+    # now 3 bad logins
+    for cnt in range(failure_limit):
+        logger.debug("bad login %d", cnt)
+        resp = do_login(client, data, use_good_password=False)
+        assert resp.status_code == 200
+
+    # Now logging in should fail
+    do_login(client, data, shall_pass=False)
+
+    # now let's check out the lockout delay
+    user_data = UserData(username=username)
+    logger.debug("userdata : %s", repr(user_data.data))
+    assert user_data.locked
+    t_fail = dateutil.parser.parse(user_data.fail_time)
+    now = datetime.datetime.now()
+    delta = now - t_fail
+    logger.debug("AGE %s", delta.seconds)
+
+
+@pytest.mark.django_db
+def test_pwd_expire(two_users):
+    """ test whether a password renewal is demanded if a password
+        has not been changed for a given time.
+    """
+    # browser = "Mozilla/5.0"
+    # client = Client(browser=browser)
+
+    username, password = two_users[0]
+    user_data = UserData(username=username)
+
+    pwd_hist = user_data.passwd_history
+    print("PWD_HIST = ", pwd_hist)
+
+    # # go to a login page and fetch csrf token
+    # url = AUTH_URL + "login/?next=" + AUTH_URL

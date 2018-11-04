@@ -45,6 +45,8 @@ INSTALLED_APPS = (
     'pwdtk',
 )
 
+PASSWORD_DURATION_SECONDS = 180
+
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -81,6 +83,17 @@ TEMPLATES = [
         },
     },
 ]
+
+TEMPLATE_CONTEXT_PROCESSORS = [
+    'django.contrib.auth.context_processors.auth',
+    'django.template.context_processors.debug',
+    'django.template.context_processors.i18n',
+    'django.template.context_processors.media',
+    'django.template.context_processors.static',
+    'django.template.context_processors.tz',
+    'django.contrib.messages.context_processors.messages',
+    ]
+
 
 WSGI_APPLICATION = 'pwdtk.testproject.dj18.wsgi.application'
 

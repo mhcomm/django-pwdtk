@@ -3,10 +3,10 @@ from __future__ import print_function
 
 import logging
 
-import django
+# import django
 
 from django.contrib.auth.signals import user_logged_in
-from django.contrib.auth.signals import user_logged_out
+# from django.contrib.auth.signals import user_logged_out
 from django.contrib.auth.signals import user_login_failed
 from django.dispatch import receiver
 
@@ -42,7 +42,6 @@ def handle_login(sender, **kwargs):
     get_backend().clear_failed_logins(user=user)
 
 
-if django.VERSION >= (2, 2):
-    @receiver(user_logged_out)
-    def handle_logout(sender, **kwargs):
-        print("LOGOUT", kwargs)
+# @receiver(user_logged_out)
+# def handle_logout(sender, **kwargs):
+#     print("LOGOUT", kwargs)

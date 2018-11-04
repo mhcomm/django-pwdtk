@@ -2,6 +2,7 @@ import logging
 
 import django
 from django.apps import AppConfig
+from django.contrib.auth import get_user_model
 
 
 logger = logging.getLogger(__name__)
@@ -30,3 +31,7 @@ class PwdTkConfig(AppConfig):
             from pwdtk.auth_backends import watch_login_dispatch
             LoginView.dispatch = watch_login_dispatch(LoginView.dispatch)
             logger.debug("LoginView.dispatch decorated")
+
+        User = get_user_model()
+        from pwdtk.watchers import watch_set_password
+        User.set_password = watch_set_password(User.set_password)

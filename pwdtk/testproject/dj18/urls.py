@@ -15,6 +15,8 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^ch_passwd/', 'pwdtk.views.password_change', name='password_change')
 ]

@@ -69,6 +69,17 @@ class UserData(object):
     def fail_time(self, value):
         self.data['fail_time'] = value
 
+    @property
+    def passwd_history(self):
+        """ password history
+            a list of tuples of timestamp, pwd_hash
+        """
+        hist = self.data.get('passwd_history')
+        if hist is None:
+            hist = self.data['passwd_history'] = []
+
+        return hist
+
     def save(self):
         if self.pwd_data:
             self.pwd_data.save()

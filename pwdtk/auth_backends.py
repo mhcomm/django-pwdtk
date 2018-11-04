@@ -42,15 +42,19 @@ class MHPwdPolicyBackend(object):
             cls.backend = cls(*args, **kwargs)
         return cls.backend
 
+    @classmethod
+    def get_user_data_cls(cls):
+        if not cls.UserDataCls:
+            cls.UserDataCls = minibelt.import_from_path(PWDTK_USER_PARAMS)
+        return cls.UserDataCls
+
     def __init__(self, userdata_cls=None):
         cls = self.__class__
-        if cls.UserDataCls is None:
-            cls.UserDataCls = minibelt.import_from_path(PWDTK_USER_PARAMS)
         if userdata_cls:
             if isinstance(userdata_cls, str):
                 userdata_cls = minibelt.import_from_path(userdata_cls)
         else:
-            userdata_cls = cls.UserDataCls
+            userdata_cls = cls.get_user_data_cls()
 
         if not cls.User:
             cls.User = get_user_model()
@@ -223,7 +227,7 @@ def watch_login(login_func):
 
 def watch_login_dispatch(dispatch_func):
     """ allows to decorate the login function in order to create a custon
-        respoonse for logged out users.
+        response for logged out users.
         This is required for old django versions, that don't receive the
         request object with a user_login_failed signa
     """
