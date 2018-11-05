@@ -195,7 +195,6 @@ def watch_login(login_func):
         return login_func
 
     def new_login(request, *args, **kwargs):
-        logger.debug("DECO")
         backend = MHPwdPolicyBackend.get_backend()
 
         if request.method != 'POST':
@@ -234,7 +233,6 @@ def watch_login_dispatch(dispatch_func):
         return dispatch_func
 
     def new_dispatch(self, request, *args, **kwargs):
-        logger.debug("DECOV")
         backend = MHPwdPolicyBackend.get_backend()
 
         if request.method != 'POST':
