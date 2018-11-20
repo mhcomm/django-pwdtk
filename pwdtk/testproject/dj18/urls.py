@@ -17,6 +17,13 @@ from django.contrib import admin
 
 
 urlpatterns = [
+    url(r'^$', 'pwdtk.testviews.home', name='pwdtk_test_home'),
+    url(r'^login', 'pwdtk.testviews.login_view',
+        name='pwdtk_test_login'),
+    url(r'^logout', 'pwdtk.testviews.logout_view',
+        name='pwdtk_test_logout'),
+    url(r'^protected', 'pwdtk.testviews.protected',
+        name='pwdtk_test_protected'),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^ch_passwd/', 'pwdtk.views.password_change', name='password_change')
+    url(r'^ch_passwd/', 'pwdtk.views.password_change', name='password_change'),
 ]

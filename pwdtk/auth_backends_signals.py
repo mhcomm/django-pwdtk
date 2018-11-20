@@ -26,7 +26,7 @@ def handle_loginfailed(sender, credentials, **kwargs):
     if not isinstance(credentials, dict) or 'username' not in credentials:
         return
     username = credentials['username']
-    print("LOGIN_FAILED for", username, "KWARGS", kwargs)
+    logger.debug("LOGIN_FAILED for %s %s", username, repr(kwargs))
     get_backend().handle_failed_login(username)
 
 
@@ -38,7 +38,7 @@ def handle_login(sender, **kwargs):
     if user is NOT_SET:
         logger.debug("login without username")
         return
-    print("LOGIN as %s" % user.username)
+    logger.debug("LOGIN as %s", user.username)
     get_backend().clear_failed_logins(user=user)
 
 

@@ -12,11 +12,15 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.shortcuts import render
 
+from pwdtk.exceptions import PwdTkMustChangePassword
+from pwdtk.helpers import get_delta_seconds
+from pwdtk.helpers import seconds_to_iso8601
 
 logger = logging.getLogger(__name__)
-logger.debug("######## Imp backend2")  # for debugging dj 1.8 -> 1.11
+# logger.debug("######## Imp backend2")  # for debugging dj 1.8 -> 1.11
 
 PWDTK_USER_FAILURE_LIMIT = settings.PWDTK_USER_FAILURE_LIMIT
 PWDTK_IP_FAILURE_LIMIT = settings.PWDTK_IP_FAILURE_LIMIT
@@ -24,10 +28,9 @@ PWDTK_LOCKOUT_TIME = settings.PWDTK_LOCKOUT_TIME
 PWDTK_LOCKOUT_TEMPLATE = settings.PWDTK_LOCKOUT_TEMPLATE
 PWDTK_USER_PARAMS = settings.PWDTK_USER_PARAMS
 PWDTK_USERNAME_FORM_FIELD = settings.PWDTK_USERNAME_FORM_FIELD
-
-
-class MHPwdPolicyBackendError(Exception):
-    """ custom exception """
+PWDTK_PASSWD_AGE = settings.PWDTK_PASSWD_AGE
+PWDTK_PASSWD_CHANGE_TEMPLATE = settings.PWDTK_PASSWD_CHANGE_TEMPLATE
+PWDTK_PASSWD_CHANGE_VIEW = settings.PWDTK_PASSWD_CHANGE_VIEW
 
 
 class MHPwdPolicyBackend(object):
@@ -68,11 +71,9 @@ class MHPwdPolicyBackend(object):
         if not user_data.locked:
             logger.debug("not locked %d", user_data.failed_logins)
             return False
-        t_fail = dateutil.parser.parse(user_data.fail_time)
-        t_delta = datetime.datetime.utcnow() - t_fail
-        delta_secs = t_delta.days * 86400 + t_delta.seconds
-        logger.debug("locked %s %s %s",
-                     repr(t_fail), repr(t_delta), repr(delta_secs))
+        delta_secs = get_delta_seconds(user_data.fail_time)
+        logger.debug("locked %s %s",
+                     user_data.fail_time, delta_secs)
         if delta_secs < PWDTK_LOCKOUT_TIME:
             logger.debug("still locked")
             return True
@@ -80,6 +81,19 @@ class MHPwdPolicyBackend(object):
         user_data.locked = False
         user_data.save()
         return False
+
+    def user_must_renew(self, username, user_data=None):
+        """ determines whether a user must renew his password
+        """
+        user_data = user_data or self.userdata_cls(username=username)
+        if not user_data.locked:
+            logger.debug("not locked %d", user_data.failed_logins)
+            return False
+        history = user_data.get('passwd_history')
+        if not history:
+            return False
+        change_delta = get_delta_seconds(history[0][0])
+        return change_delta > settings.PWDTK_PASSWD_AGE
 
     def check_tries_per_user(self, username):
         """ checks whether a user has more than the allowed amount of failed logins
@@ -151,6 +165,19 @@ class MHPwdPolicyBackend(object):
         data.save()
         return failed_logins
 
+    def check_obsolete_passwords(self, username):
+        """ checks whether password must be changed and
+            raises exception if change is required
+        """
+        data = self.userdata_cls(username=username)
+        history = data.passwd_history
+        if not history:
+            return
+        change_delta = get_delta_seconds(history[0][0])
+        if change_delta > settings.PWDTK_PASSWD_AGE:
+            raise PwdTkMustChangePassword(
+                "user %s must change his password" % username)
+
 
 def lockout_response(request, backend, msg=''):
     """ create login response for locked out users
@@ -187,12 +214,36 @@ def lockout_response(request, backend, msg=''):
         return render(request, PWDTK_LOCKOUT_TEMPLATE, context, status=403)
 
 
+def change_passwd_response(request, backend, msg=''):
+    """ create login response for locked out users
+    """
+    username = request.POST.get(PWDTK_USERNAME_FORM_FIELD, '')
+    context = {
+        'max_passwd_age': PWDTK_PASSWD_AGE,
+        'username': username,
+        'msg': msg,
+    }
+
+    logger.debug("CTX: %s", context)
+
+    if request.is_ajax():
+        return HttpResponse(
+            json.dumps(context),
+            content_type='application/json',
+            status=403,
+        )
+    return redirect(PWDTK_PASSWD_CHANGE_VIEW, username=username)
+    if PWDTK_LOCKOUT_TEMPLATE:
+        return render(request, PWDTK_LOCKOUT_TEMPLATE, context, status=403)
+
+
 def watch_login(login_func):
-    """ allows to decorate the login function in order to create a custon
-        respoonse for logged out users.
-        This is required for old django versions, that don't receive the
-        request object with a user_login_failed signa
-        # TO BE USED FOR PRE-DJANGO 1.11
+    """ allows to decorate the login function in order to create a custom
+        response for
+        - locked out users (too many login attempts)
+           user_login_failed-signal for pre-django 1.8 does not pass
+           the request object
+        - users who didn't renew their password
     """
     # Don't decorate multiple times
     if login_func.__name__ == 'new_login':
@@ -201,18 +252,28 @@ def watch_login(login_func):
     def new_login(request, *args, **kwargs):
         backend = MHPwdPolicyBackend.get_backend()
 
+        # all non POST requests will not be intercepted
         if request.method != 'POST':
             return login_func(request, *args, **kwargs)
 
         logger.debug("intercepting POST to login")
         username = request.POST[PWDTK_USERNAME_FORM_FIELD]
+
         try:
+            # Check for lockout due to too many logins with wrong password
             backend.check_tries_per_user(username)
+
+            # Check for  password renewal due to obsolete password
+            backend.check_obsolete_passwords(username)
+
             return login_func(request, *args, **kwargs)
         except PermissionDenied as exc:
-            logger.debug("login blocked %s %s", repr(exc), repr(vars(exc)))
+            logger.info("login blocked %s %s", repr(exc), repr(vars(exc)))
             msg = "arx"
             return lockout_response(request, backend, msg)
+        except PwdTkMustChangePassword as exc:
+            msg = "hui"
+            return change_passwd_response(request, backend, msg)
 
         logger.debug("calling login with %s, %s and %s",
                      repr(request), repr(args), repr(kwargs))
@@ -226,10 +287,8 @@ def watch_login(login_func):
 
 
 def watch_login_dispatch(dispatch_func):
-    """ allows to decorate the login function in order to create a custon
-        response for logged out users.
-        This is required for old django versions, that don't receive the
-        request object with a user_login_failed signa
+    """ allows to decorate dispatch function of the LoginView in order to
+        create a custom response for locked out users.
     """
     # Don't decorate multiple times
     logger.debug("FUNC_NAME: %s", dispatch_func.__name__)
@@ -239,19 +298,30 @@ def watch_login_dispatch(dispatch_func):
     def new_dispatch(self, request, *args, **kwargs):
         backend = MHPwdPolicyBackend.get_backend()
 
+        # all non POST requests will not be intercepted
         if request.method != 'POST':
             return dispatch_func(self, request, *args, **kwargs)
 
         logger.debug("intercepting POST to dispatch")
         username = request.POST[PWDTK_USERNAME_FORM_FIELD]
         try:
+            # Check for lockout due to too many logins with wrong password
             backend.check_tries_per_user(username)
+
+            # Check for  password renewal due to obsolete password
+            backend.check_obsolete_passwords(username)
+
             return dispatch_func(self, request, *args, **kwargs)
+
         except PermissionDenied as exc:
             logger.debug("login dispatch blocked %s %s",
                          repr(exc), repr(vars(exc)))
             msg = "arx"
             return lockout_response(request, backend, msg)
+
+        except PwdTkMustChangePassword as exc:
+            logger.info("user %s must change password: %s %s",
+                        username, repr(exc), repr(vars(exc)))
 
         logger.debug("calling login with %s, %s and %s",
                      repr(request), repr(args), repr(kwargs))
@@ -259,43 +329,6 @@ def watch_login_dispatch(dispatch_func):
         logger.debug("login returned %s", repr(rslt))
         return rslt
 
-    logger.debug("decorated the login function")
+    logger.debug("decorated the dispatch function")
 
     return new_dispatch
-
-
-def seconds_to_iso8601(seconds):
-    """ helper to convert seconds to iso string """
-
-    seconds = float(seconds)
-    minutes, seconds = divmod(seconds, 60)
-    hours, minutes = divmod(minutes, 60)
-    days, hours = divmod(hours, 24)
-    days, hours, minutes = map(int, (days, hours, minutes))
-    seconds = round(seconds, 6)
-
-    # ## build date
-    date = ''
-    if days:
-        date = '%sD' % days
-
-    # ## build time
-    time = u'T'
-    # hours
-    bigger_exists = date or hours
-    if bigger_exists:
-        time += '{:02}H'.format(hours)
-    # minutes
-    bigger_exists = bigger_exists or minutes
-    if bigger_exists:
-        time += '{:02}M'.format(minutes)
-    # seconds
-    if seconds.is_integer():
-        seconds = '{:02}'.format(int(seconds))
-    else:
-        # 9 chars long w/leading 0, 6 digits after decimal
-        seconds = '%09.6f' % seconds
-    # remove trailing zeros
-    seconds = seconds.rstrip('0')
-    time += '{}S'.format(seconds)
-    return u'P' + date + time

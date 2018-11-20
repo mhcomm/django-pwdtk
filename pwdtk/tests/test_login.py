@@ -30,6 +30,7 @@ def two_users():
         username = 'user%d' % ctr
         passwd = 'pwd%d' % ctr
         usr = User(username=username)
+        usr.save()
         usr.set_password(passwd)
         usr.is_staff = True
         usr.save()
@@ -100,6 +101,23 @@ def do_logout(client):
     status_code = int(resp.status_code)
     assert status_code in [200, 302]
     logger.debug("logout successful")
+
+
+def change_passwd(username, password):
+    """ changes password of a user """
+    User = get_user_model()
+    user = User.objects.get(username=username)
+    user.set_password(password)
+    user.save()
+
+
+def set_password_age(username, age, offset=0):
+    user_data = UserData(username=username)
+    pwd_hist = user_data.passwd_history
+    entry = pwd_hist[offset]
+    entry_date = (datetime.datetime.now() - datetime.timedelta(seconds=age))
+    entry[0] = entry_date.isoformat()
+    user_data.save()
 
 
 @pytest.mark.django_db
@@ -188,8 +206,9 @@ def test_pwd_expire(two_users):
     """ test whether a password renewal is demanded if a password
         has not been changed for a given time.
     """
-    # browser = "Mozilla/5.0"
-    # client = Client(browser=browser)
+
+    browser = "Mozilla/5.0"
+    client = Client(browser=browser)
 
     username, password = two_users[0]
     user_data = UserData(username=username)
@@ -198,4 +217,33 @@ def test_pwd_expire(two_users):
     print("PWD_HIST = ", pwd_hist)
 
     # # go to a login page and fetch csrf token
-    # url = AUTH_URL + "login/?next=" + AUTH_URL
+    url = AUTH_URL + "login/?next=" + AUTH_URL
+
+    resp = client.get(url)
+
+    csrf_token = resp.cookies.get('csrf_token')
+    # prepare post_data
+
+    # password += '1'
+    # change_passwd(username, password)
+
+    data = dict(
+        username=username,
+        password=password,
+        csrfmiddlewaretoken=csrf_token,
+        )
+    do_login(client, data)
+
+    user_data = UserData(username=username)
+    pwd_hist = user_data.passwd_history
+    print("PWD_HIST = ", pwd_hist)
+
+    # make passwd obsolete
+    # set_password_age(username, settings.PWDTK_PASSWD_AGE + 1)
+
+    user_data = UserData(username=username)
+    pwd_hist = user_data.passwd_history
+    print("PWD_HIST = ", pwd_hist)
+
+    # now login should fail
+    do_login(client, data)
