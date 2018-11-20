@@ -15,6 +15,8 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+TOP_DIR = os.environ.get("PWDTK_TOPDIR",
+                         os.path.dirname(os.path.dirname(BASE_DIR)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -27,6 +29,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+
+LOGIN_URL = "/login"
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -47,7 +51,7 @@ INSTALLED_APPS = (
 
 PASSWORD_DURATION_SECONDS = 180
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -56,7 +60,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-)
+]
 
 ROOT_URLCONF = 'pwdtk.testproject.dj18.urls'
 
@@ -65,6 +69,7 @@ ROOT_URLCONF = 'pwdtk.testproject.dj18.urls'
 # TODO: refactor and move into separate app
 import pwdtk.auth_backends_settings  # noqa E402
 pwdtk.auth_backends_settings.add_backend(AUTHENTICATION_BACKENDS)
+pwdtk.auth_backends_settings.add_middlewares(MIDDLEWARE_CLASSES)
 from pwdtk.auth_backends_settings import *  # noqa F401
 
 
@@ -78,21 +83,12 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.static',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
-
-TEMPLATE_CONTEXT_PROCESSORS = [
-    'django.contrib.auth.context_processors.auth',
-    'django.template.context_processors.debug',
-    'django.template.context_processors.i18n',
-    'django.template.context_processors.media',
-    'django.template.context_processors.static',
-    'django.template.context_processors.tz',
-    'django.contrib.messages.context_processors.messages',
-    ]
 
 
 WSGI_APPLICATION = 'pwdtk.testproject.dj18.wsgi.application'
@@ -104,7 +100,9 @@ WSGI_APPLICATION = 'pwdtk.testproject.dj18.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db18.sqlite3'),
+        'NAME': os.path.join(
+            TOP_DIR,
+            os.environ.get('PWDTK_DB_FILE', 'db18.sqlite3')),
     }
 }
 
@@ -127,6 +125,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'cstatic18')
+
 
 TEST_RUNNER = 'pwdtk.testproject.pytest_runner.PytestTestRunner'
 

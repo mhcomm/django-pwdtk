@@ -55,7 +55,7 @@ flake3:
 # ############################################################################
 # Test stage
 # ############################################################################
-test:
+test_18:
   tags:
     - shell
   stage: test
@@ -63,5 +63,25 @@ test:
   script:
     - python -V
     - pip install -U tox
-    - tox
+    - tox -e py27-django18,py35-django18,py36-django18
+
+test_1:
+  tags:
+    - shell
+  stage: test
+  allow_failure: false
+  script:
+    - python -V
+    - pip install -U tox
+    - tox -e py27-django1,py35-django1,py36-django1
+
+test_21:
+  tags:
+    - shell
+  stage: test
+  allow_failure: true
+  script:
+    - python -V
+    - pip install -U tox
+    - tox -e py35-django21,py36-django21
 

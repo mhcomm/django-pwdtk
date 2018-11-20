@@ -15,6 +15,9 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+TOP_DIR = os.environ.get("PWDTK_TOPDIR",
+                         os.path.dirname(os.path.dirname(BASE_DIR)))
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
@@ -88,7 +91,9 @@ WSGI_APPLICATION = 'pwdtk.testproject.dj21.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db21.sqlite3'),
+        'NAME': os.path.join(
+            TOP_DIR,
+            os.environ.get('PWDTK_DB_FILE', 'db21.sqlite3')),
     }
 }
 

@@ -1,0 +1,15 @@
+<html>
+welcome to the login &lt;{{ username }}&gt;<br/>
+You are {% if not username %} NOT {% endif %} logged in.<br/>
+<br/>
+{% if not username %}
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit">
+</form>
+</html>
+{% endif %}
+<a href="/">Home</a><br/>
+<a href="/admin">admin area</a><br/>
+
