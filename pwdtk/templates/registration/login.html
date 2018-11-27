@@ -3,7 +3,7 @@ welcome to the login &lt;{{ username }}&gt;<br/>
 You are {% if not username %} NOT {% endif %} logged in.<br/>
 <br/>
 {% if not username %}
-<form action="" method="post">
+<form method="post">
     {% csrf_token %}
     {{ form }}
     <input type="submit" value="Submit">

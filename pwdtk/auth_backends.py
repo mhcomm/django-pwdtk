@@ -281,7 +281,7 @@ def watch_login(login_func):
         logger.debug("login returned %s", repr(rslt))
         return rslt
 
-    logger.debug("decorated the login function")
+    logger.debug("decorated the login function %s", repr(login_func))
 
     return new_login
 

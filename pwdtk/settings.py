@@ -8,12 +8,20 @@ def add_backend(backends):
         backends.insert(
             0, 'pwdtk.auth_backends.MHPwdPolicyBackend')
 
-# PWDTK Passsword lockout after logins with bad password
+# PWDTK Common settings for login / logout views
 # ----------------------------------------------------------
-
 
 # Model to be used for storing PWDTK related info
 PWDTK_USER_PARAMS = 'pwdtk.auth_backends_data.UserData'
+
+# to know what login views to watch
+PWDTK_LOGIN_VIEW = 'django.contrib.auth.views.login' # for django < 1.11
+PWDTK_LOGIN_VIEW_CLASS = 'django.contrib.auth.views.LoginView' # for django > 1.11
+
+
+# PWDTK Passsword lockout after logins with bad password
+# ----------------------------------------------------------
+
 
 # Time in seconds to lockout a user who entered a bad password too iften
 PWDTK_LOCKOUT_TIME = 60

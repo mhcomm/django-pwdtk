@@ -18,7 +18,7 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^$', 'pwdtk.testviews.home', name='pwdtk_test_home'),
-    url(r'^login', 'pwdtk.testviews.login_view',
+    url(r'^login', 'django.contrib.auth.views.login',
         name='pwdtk_test_login'),
     url(r'^logout', 'pwdtk.testviews.logout_view',
         name='pwdtk_test_logout'),
