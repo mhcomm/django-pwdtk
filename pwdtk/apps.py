@@ -17,6 +17,12 @@ class PwdTkConfig(AppConfig):
     name = 'pwdtk'
 
     def ready(self):
+        """ Install all required hooks for pwdtk
+            The required hooks depend on the django version.
+
+        """
+        # TODO: add hoks only if pwdtk feature needing the hook has been
+        # enabled
         logger.debug("PWDTK READY")
         import pwdtk.auth_backends_signals  # noqa: F401
         if django.VERSION < (1, 11):

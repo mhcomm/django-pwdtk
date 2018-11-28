@@ -232,7 +232,7 @@ def change_passwd_response(request, backend, msg=''):
             content_type='application/json',
             status=403,
         )
-    return redirect(PWDTK_PASSWD_CHANGE_VIEW, username=username)
+    return redirect(PWDTK_PASSWD_CHANGE_VIEW)
     if PWDTK_LOCKOUT_TEMPLATE:
         return render(request, PWDTK_LOCKOUT_TEMPLATE, context, status=403)
 
@@ -273,7 +273,13 @@ def watch_login(login_func):
             return lockout_response(request, backend, msg)
         except PwdTkMustChangePassword as exc:
             msg = "hui"
-            return change_passwd_response(request, backend, msg)
+            logger.debug("GET_PARAM %s", repr(request.GET))
+            mutable = request.GET._mutable
+            request.GET._mutable = True
+            request.GET['next'] = "/ch_passwd"
+            request.GET._mutable = mutable
+            #
+            # return change_passwd_response(request, backend, msg)
 
         logger.debug("calling login with %s, %s and %s",
                      repr(request), repr(args), repr(kwargs))

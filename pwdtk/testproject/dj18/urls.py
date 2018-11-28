@@ -26,4 +26,7 @@ urlpatterns = [
         name='pwdtk_test_protected'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^ch_passwd/', 'pwdtk.views.password_change', name='password_change'),
+    # url('^ch_passwd/$', 'django.contrib.auth.views.password_change', {'post_change_redirect': 'next_page'}, name='password_change'),
+    # url('^ch_passwd/$', 'django.contrib.auth.views.password_change', name='password_change'),
+    url('^pwd_change_done$', 'pwdtk.testviews.home', name='password_change_done'),
 ]
