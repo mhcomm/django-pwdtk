@@ -11,12 +11,16 @@ def add_backend(backends):
 # PWDTK Common settings for login / logout views
 # ----------------------------------------------------------
 
+
 # Model to be used for storing PWDTK related info
 PWDTK_USER_PARAMS = 'pwdtk.auth_backends_data.UserData'
 
 # to know what login views to watch
-PWDTK_LOGIN_VIEW = 'django.contrib.auth.views.login' # for django < 1.11
-PWDTK_LOGIN_VIEW_CLASS = 'django.contrib.auth.views.LoginView' # for django > 1.11
+# for django < 1.11
+PWDTK_LOGIN_VIEW = 'django.contrib.auth.views.login'
+
+# for django > 1.11
+PWDTK_LOGIN_VIEW_CLASS = 'django.contrib.auth.views.LoginView'
 
 
 # PWDTK Passsword lockout after logins with bad password
@@ -69,4 +73,3 @@ PWDTK_TEST_LOGIN_FAIL_SUBMSG = b'Please enter the correct'
 
 # message to be found in contents to detect a locked out user
 PWDTK_TEST_LOCKOUT_SUBMSG = b'So bad!'
-

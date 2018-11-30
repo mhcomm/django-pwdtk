@@ -271,7 +271,7 @@ def watch_login(login_func):
             logger.info("login blocked %s %s", repr(exc), repr(vars(exc)))
             msg = "arx"
             return lockout_response(request, backend, msg)
-        except PwdTkMustChangePassword as exc:
+        except PwdTkMustChangePassword:
             msg = "hui"
             logger.debug("GET_PARAM %s", repr(request.GET))
             mutable = request.GET._mutable

@@ -15,14 +15,14 @@ class PasswdChange(forms.Form):
     password = forms.CharField(label='password', max_length=256,
                                widget=PasswordInput)
     password2 = forms.CharField(label='confirm password', max_length=256,
-                               widget=PasswordInput)
+                                widget=PasswordInput)
 
 
 def password_change(request, username=""):
     user = request.user
     ctx = dict(
         username=user.username if user else "?",
-        errormsg = "",
+        errormsg="",
         )
     if request.method == 'POST':
         form = PasswdChange(request.POST)
