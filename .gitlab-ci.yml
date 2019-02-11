@@ -32,6 +32,10 @@ flake2:
     - shell
   stage: lint
   allow_failure: false
+  retry:
+      max: 2
+      when:
+        - runner_system_failure
   script:
     - "[ -s 'eenv/bin/activate' ] && . eenv/bin/activate"
     - python -V
@@ -44,6 +48,10 @@ flake3:
     - shell
   stage: lint
   allow_failure: false
+  retry:
+      max: 2
+      when:
+        - runner_system_failure
   script:
     - "[ -s 'eenv3/bin/activate' ] && . eenv3/bin/activate"
     - python -V
@@ -60,6 +68,10 @@ test_18:
     - shell
   stage: test
   allow_failure: false
+  retry:
+      max: 2
+      when:
+        - runner_system_failure
   script:
     - python -V
     - pip install -U tox
@@ -70,6 +82,10 @@ test_1:
     - shell
   stage: test
   allow_failure: false
+  retry:
+      max: 2
+      when:
+        - runner_system_failure
   script:
     - python -V
     - pip install -U tox
@@ -80,6 +96,10 @@ test_21:
     - shell
   stage: test
   allow_failure: true
+  retry:
+      max: 2
+      when:
+        - runner_system_failure
   script:
     - python -V
     - pip install -U tox
