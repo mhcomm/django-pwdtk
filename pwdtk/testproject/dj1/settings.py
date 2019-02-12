@@ -15,6 +15,8 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+TOP_DIR = os.environ.get("PWDTK_TOPDIR",
+                         os.path.dirname(os.path.dirname(BASE_DIR)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -61,6 +63,7 @@ ROOT_URLCONF = 'pwdtk.testproject.dj1.urls'
 # TODO: refactor and move into separate app
 import pwdtk.auth_backends_settings  # noqa E402
 pwdtk.auth_backends_settings.add_backend(AUTHENTICATION_BACKENDS)
+pwdtk.auth_backends_settings.add_middlewares(MIDDLEWARE)
 from pwdtk.auth_backends_settings import *  # noqa F401
 
 
@@ -89,7 +92,9 @@ WSGI_APPLICATION = 'pwdtk.testproject.dj1.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db1.sqlite3'),
+        'NAME': os.path.join(
+            TOP_DIR,
+            os.environ.get('PWDTK_DB_FILE', 'db1.sqlite3')),
     }
 }
 
@@ -97,24 +102,26 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
+# allow really simple passwords (simpler for testing)
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.'
-                'UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.'
-                'MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.'
-                'CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.'
-                'NumericPasswordValidator',
-    },
-]
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.'
+    #             'UserAttributeSimilarityValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.'
+    #             'MinimumLengthValidator',
+    #     'OPTIONS': { 'min_length': 4},
+    #     },
+    #    {
+    #        'NAME': 'django.contrib.auth.password_validation.'
+    #                'CommonPasswordValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.'
+    #             'NumericPasswordValidator',
+    # },
+    ]
 
 
 # Internationalization

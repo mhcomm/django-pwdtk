@@ -14,6 +14,9 @@ class PwdTkError(Exception):
 
 
 class UserData(object):
+    """ class representing user specific persistent data,
+        that is required for pwdtk functionalty
+    """
     User = None
 
     def __init__(self, user=None, username=None):
@@ -26,21 +29,27 @@ class UserData(object):
         if user:
             username = user.username
         elif username:
-            user = User.objects.get(username=username)
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                user = None
         else:
             msg = "need either user or username"
             logger.error(msg)
             raise PwdTkError(msg)
 
         self.user = user
+        user_id = user.id if user else None
         pwd_data, created = PwdData.objects.get_or_create(
-            user_id=user.id,
+            username=username,
             defaults={
-                'username': username,
+                'user_id': user_id,
                 'data': {},
                 }
             )
-        pwd_data.save()
+        if pwd_data.user_id != user_id:
+            pwd_data.user_id = user_id
+            pwd_data.save()
 
         self.pwd_data = pwd_data
         self.data = self.pwd_data.data
@@ -77,6 +86,7 @@ class UserData(object):
         hist = self.data.get('passwd_history')
         if hist is None:
             hist = self.data['passwd_history'] = []
+            self.save()
 
         return hist
 

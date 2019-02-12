@@ -1,4 +1,3 @@
-django-jsonfield
 future
 minibelt
 python-dateutil
