@@ -163,6 +163,8 @@ class MHPwdPolicyBackend(object):
             shall detect failed logins with username and password
             and lock out the user if too many login fails occured
         """
+        if PWDTK_USER_FAILURE_LIMIT is None:
+            return 0
         logger.debug("failed login for %s", username)
         data = self.userdata_cls(username=username)
         data.fail_time = datetime.datetime.utcnow().isoformat()

@@ -62,9 +62,9 @@ ROOT_URLCONF = 'pwdtk.testproject.dj21.urls'
 # PWDTK specifics
 # For MH authentification back end
 # TODO: refactor and move into separate app
-import pwdtk.auth_backends_settings  # noqa E402
-pwdtk.auth_backends_settings.add_backend(AUTHENTICATION_BACKENDS)
-from pwdtk.auth_backends_settings import *  # noqa F401
+import pwdtk.settings  # noqa E402
+pwdtk.settings.add_backend(AUTHENTICATION_BACKENDS)
+from pwdtk.settings import *  # noqa F401
 
 TEMPLATES = [
     {

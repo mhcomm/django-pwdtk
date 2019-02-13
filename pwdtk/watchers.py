@@ -2,7 +2,7 @@ import datetime
 import logging
 import os
 
-from pwdtk.auth_backends_settings import PWDTK_PASSWD_HISTORY_LEN
+from pwdtk.settings import PWDTK_PASSWD_HISTORY_LEN
 
 
 logger = logging.getLogger(__name__)
