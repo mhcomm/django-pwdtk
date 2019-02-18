@@ -14,7 +14,7 @@ long_description='package to tune django password authentification',
 
 setup(
     name='django-pwdtk',
-    version='0.0.2',
+    version='0.1.0',
     description='package to tune django password authentification',
     #long_description=long_description,
     #long_description_content_type="text/x-rst",
