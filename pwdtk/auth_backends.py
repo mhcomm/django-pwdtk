@@ -212,9 +212,12 @@ def lockout_response(request, backend, msg=''):
         t_delta = datetime.datetime.utcnow() - t_fail
         age = t_delta.days * 86400 + t_delta.seconds
         to_wait = PWDTK_LOCKOUT_TIME - age
+        to_wait_minutes = to_wait // 60
+        to_wait_seconds = to_wait % 60
         to_wait_str = "%d minutes and %d seconds" % (
-            to_wait // 60, to_wait % 60)
+            to_wait_minutes, to_wait_seconds)
         context['to_wait'] = to_wait_str
+        context['to_wait_time_tuple'] = (to_wait_minutes, to_wait_seconds)
 
     logger.debug("CTX: %s", context)
 
