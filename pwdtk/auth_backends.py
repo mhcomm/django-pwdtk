@@ -249,9 +249,12 @@ def change_passwd_response(request, backend, msg=''):
             content_type='application/json',
             status=403,
         )
+
+    if PWDTK_PASSWD_CHANGE_TEMPLATE:
+        return render(
+            request, PWDTK_PASSWD_CHANGE_TEMPLATE, context, status=403)
+
     return redirect(PWDTK_PASSWD_CHANGE_VIEW)
-    if PWDTK_LOCKOUT_TEMPLATE:
-        return render(request, PWDTK_LOCKOUT_TEMPLATE, context, status=403)
 
 
 def watch_login(login_func):
@@ -295,8 +298,8 @@ def watch_login(login_func):
             request.GET._mutable = True
             request.GET['next'] = "/ch_passwd"
             request.GET._mutable = mutable
-            #
-            # return change_passwd_response(request, backend, msg)
+
+            return change_passwd_response(request, backend, msg)
 
         logger.debug("calling login with %s, %s and %s",
                      repr(request), repr(args), repr(kwargs))
