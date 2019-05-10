@@ -70,6 +70,7 @@ pwdtk.settings.add_backend(AUTHENTICATION_BACKENDS)
 pwdtk.settings.add_middlewares(MIDDLEWARE_CLASSES)
 from pwdtk.settings import *  # noqa F401
 
+PWDTK_PASSWD_CHANGE_TEMPLATE = None
 
 TEMPLATES = [
     {
