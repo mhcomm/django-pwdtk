@@ -39,7 +39,7 @@ AUTHENTICATION_BACKENDS = [
 # Application definition
 
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,7 +47,11 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pwdtk',
-)
+]
+if os.environ.get('USE_DJANGO_EXTENSIONS', "no").lower()[:1] in "yt1":
+    INSTALLED_APPS += [
+        "django_extensions"
+        ]
 
 PASSWORD_DURATION_SECONDS = 180
 
