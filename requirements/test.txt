@@ -1,2 +1,4 @@
+django-extensions
+jsonfield
 pytest
 pytest-django
