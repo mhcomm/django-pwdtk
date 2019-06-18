@@ -37,6 +37,7 @@ Welcome to the protected space.<br/>
 You are {{ username }}
 This space requires to be authenticated<br/>
 <a href="/">Top</a><br/>
+<a href="/admin/password_change/">Change password</a><br/>
 <a href="/logout?next=/protected">Logout</a><br/>
 """
 
