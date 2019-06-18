@@ -25,30 +25,41 @@ class PwdTkConfig(AppConfig):
         # enabled
         logger.debug("PWDTK READY")
         if django.VERSION < (1, 11):
+            # Connect Signals
             import pwdtk.sig_receivers  # noqa: F401
-            logger.debug("old django style: try to decorate login function")
+
+            logger.debug("old django style: will decorate some functions")
+
+            logger.debug("try to decorate login function")
             mod_name, obj_name = settings.PWDTK_LOGIN_VIEW.rsplit('.', 1)
             auth_mod = importlib.import_module(mod_name)
             login_func = getattr(auth_mod, obj_name)
             from pwdtk.auth_backends import watch_login
-            setattr(auth_mod, obj_name, watch_login(login_func))
             # login_func wrapper in order to
             # lockout for tries per user (and redirect to specific page)
             # lockout for password, that's too old (hasn't been changed)
+            setattr(auth_mod, obj_name, watch_login(login_func))
             logger.debug("login function decorated")
+
+            logger.debug("decorationg set_password function")
             User = get_user_model()
             from pwdtk.watchers import watch_set_password
             User.set_password = watch_set_password(User.set_password)
+            logger.debug("set_password function decorated")
         # django >= 1.11 can't use auth_views.login, so decorate the view
         elif django.VERSION < (2, 0):
+            # Connect Signals
             import pwdtk.sig_receivers  # noqa: F401
+
             # TODO: perhaps for newer Djangos we find a way without monkey
             # TODO: patching
             User = get_user_model()
             from pwdtk.watchers import watch_set_password
             User.set_password = watch_set_password(User.set_password)
         elif django.VERSION < (2, 2):
+            # Connect Signals
             import pwdtk.sig_receivers  # noqa: F401
+
             # TODO: perhaps for newer Djangos we find a way without monkey
             # TODO: patching
             User = get_user_model()
