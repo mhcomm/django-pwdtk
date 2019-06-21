@@ -298,6 +298,8 @@ def watch_login(login_func):
             request.GET._mutable = True
             request.GET['next'] = "/ch_passwd"
             request.GET._mutable = mutable
+            logger.debug("continue original login")
+            login_func(request, *args, **kwargs)
 
             return change_passwd_response(request, backend, msg)
 
