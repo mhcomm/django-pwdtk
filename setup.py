@@ -1,7 +1,10 @@
 from __future__ import absolute_import
 
+
 # third party modules
+from setuptools import find_packages
 from setuptools import setup
+
 install_requires = [
     'django-jsonfield',
     'future',
@@ -26,14 +29,7 @@ setup(
     author='MHComm',
     author_email='info@mhcomm.fr',
     license="MIT",
-    packages=[
-      'pwdtk',
-      'pwdtk.testproject',
-      'pwdtk.testproject.dj18',
-      'pwdtk.testproject.dj1',
-      'pwdtk.testproject.dj21',
-      'pwdtk.tests',
-      ],
+    packages=find_packages(),
     scripts=[],
     entry_points={
         'console_scripts': [
