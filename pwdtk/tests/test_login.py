@@ -5,41 +5,24 @@ import datetime
 import logging
 
 import dateutil.parser
+import django
 import pytest
 
+
 from builtins import range
-import django
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http.response import HttpResponseRedirect
 from django.test import Client
 
 from pwdtk.auth_backends import MHPwdPolicyBackend
+from pwdtk.tests.fixtures import two_users  # noqa: F401
 
 
 logger = logging.getLogger(__name__)
 
 AUTH_URL = settings.PWDTK_TEST_ADMIN_URL
 UserData = MHPwdPolicyBackend.get_user_data_cls()
-
-
-@pytest.fixture
-def two_users():
-    """ create two users with two passwords """
-    User = get_user_model()
-    users = []
-    for ctr in range(2):
-        username = 'user%d' % ctr
-        passwd = 'pwd%d' % ctr
-        usr = User(username=username)
-        usr.save()
-        usr.set_password(passwd)
-        usr.is_staff = True
-        usr.save()
-        logger.debug("create user %r %r", username, passwd)
-        users.append((username, passwd))
-
-    return users
 
 
 def do_login(client, data, use_good_password=True, shall_pass=None):
@@ -142,7 +125,7 @@ def set_password_age(username, age, offset=0):
 
 
 @pytest.mark.django_db
-def test_login_no_form(two_users):
+def test_login_no_form(two_users):  # noqa: F811
     """ client login without the login url """
     browser = "Mozilla/5.0"
     client = Client(browser=browser)
@@ -162,7 +145,7 @@ def test_login_no_form(two_users):
 
 
 @pytest.mark.django_db
-def test_login(two_users):
+def test_login(two_users):  # noqa: F811
     """ login via the login url """
     browser = "Mozilla/5.0"
     client = Client(browser=browser)
@@ -230,7 +213,7 @@ def test_login(two_users):
 
 
 @pytest.mark.django_db
-def test_pwd_expire(two_users):
+def test_pwd_expire(two_users):  # noqa: F811
     """ test whether a password renewal is demanded if a password
         has not been changed for a given time.
     """
