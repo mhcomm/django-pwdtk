@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+from django.conf import global_settings
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -45,6 +48,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'pwdtk',
 ]
+if os.environ.get('USE_DJANGO_EXTENSIONS', "no").lower()[:1] in "yt1":
+    INSTALLED_APPS += [
+        "django_extensions"
+        ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -137,7 +144,12 @@ USE_L10N = True
 
 USE_TZ = True
 
+PASSWORD_HASHERS = list(global_settings.PASSWORD_HASHERS)
 
+if not any("UnsaltedMD5PasswordHasher" in val for val in PASSWORD_HASHERS):
+    PASSWORD_HASHERS.append(
+         'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher'
+        )
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
