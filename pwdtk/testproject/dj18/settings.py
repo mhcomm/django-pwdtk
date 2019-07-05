@@ -135,3 +135,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'cstatic18')
 TEST_RUNNER = 'pwdtk.testproject.pytest_runner.PytestTestRunner'
 
 from pwdtk.testproject.logcfg import LOGGING  # noqa: F401
+
+# Just for debugging
+# PASSWORD_HASHERS = [
+#     'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
+#     ]
