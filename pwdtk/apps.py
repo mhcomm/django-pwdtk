@@ -21,7 +21,7 @@ class PwdTkConfig(AppConfig):
             The required hooks depend on the django version.
 
         """
-        # TODO: add hoks only if pwdtk feature needing the hook has been
+        # TODO: add hooks only if pwdtk feature needing the hook has been
         # enabled
         logger.debug("PWDTK READY")
         if django.VERSION < (1, 11):
