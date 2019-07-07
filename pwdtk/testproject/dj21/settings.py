@@ -71,6 +71,7 @@ ROOT_URLCONF = 'pwdtk.testproject.dj21.urls'
 # TODO: refactor and move into separate app
 import pwdtk.settings  # noqa E402
 pwdtk.settings.add_backend(AUTHENTICATION_BACKENDS)
+pwdtk.settings.add_middlewares(MIDDLEWARE)
 from pwdtk.settings import *  # noqa F401
 
 TEMPLATES = [
