@@ -1,5 +1,13 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v0.2.3](https://github.com/mhcomm/django-pwdtk/compare/0.2.2...v0.2.3)
+* improve project description
+* improve README slightly
+* update changelog
+## [v0.2.2](https://github.com/mhcomm/django-pwdtk/compare/0.2.1...v0.2.2)
+* fix bug #8 (recursion issue if password set with non default hash and user logs in)
+* add some CI test for py2 py3 django 1.8 / django 1.11
+* TODO: improve documentation / README / changelog
 ## [v0.2.1](https://github.com/mhcomm/django-pwdtk/compare/0.2.0...v0.2.1)
 * auto discover modules for release generation (forgot migrations in prev release)
 * test projects use django_extensions if installed
