@@ -20,7 +20,7 @@ def test_pwd_nodflt_hash(two_users):  # noqa: F811
     user = User.objects.get(username=username)
     print("user %s with %r" % (user, passwd))
     hashers = settings.PASSWORD_HASHERS
-    print("hashers:\n%s", "\n".join(str(hasher) for hasher in hashers))
+    print("hashers:\n%s" % "\n".join(str(hasher) for hasher in hashers))
     salt = ""
     if "django.contrib.auth.hashers.UnsaltedMD5PasswordHasher" in hashers:
         hasher_cls_name = ("django.contrib.auth.hashers"
