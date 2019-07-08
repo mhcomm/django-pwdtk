@@ -9,14 +9,14 @@ matrix:
    env: DJANGO_VERSION=18
  - python: 3.5
    env: DJANGO_VERSION=1
- - python: 3.5
-   env: DJANGO_VERSION=21
+# - python: 3.5
+#   env: DJANGO_VERSION=21
  - python: 3.6
    env: DJANGO_VERSION=18
  - python: 3.6
    env: DJANGO_VERSION=1
- - python: 3.6
-   env: DJANGO_VERSION=21
+# - python: 3.6
+#   env: DJANGO_VERSION=21
 
 install:
   - pip install tox
