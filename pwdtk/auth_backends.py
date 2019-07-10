@@ -6,6 +6,8 @@ import datetime
 import json
 import logging
 
+from functools import wraps
+
 import dateutil.parser
 import minibelt
 
@@ -266,9 +268,10 @@ def watch_login(login_func):
         - users who didn't renew their password
     """
     # Don't decorate multiple times
-    if login_func.__name__ == 'new_login':
+    if hasattr(login_func, "_decorated_by_pwdtk"):
         return login_func
 
+    @wraps(login_func)
     def new_login(request, *args, **kwargs):
         backend = MHPwdPolicyBackend.get_backend()
 
@@ -310,6 +313,7 @@ def watch_login(login_func):
         return rslt
 
     logger.debug("decorated the login function %s", repr(login_func))
+    new_login._decorated_by_pwdtk = True
 
     return new_login
 
@@ -319,13 +323,13 @@ def watch_login_dispatch(dispatch_func):
         create a custom response for locked out users.
     """
     # Don't decorate multiple times
-    if hasattr(dispatch_func, 'pwdtk_decorated'):
-        logger.warning("login.view.dispatch already decorated by pwdtk: %s",
-                       repr(dispatch_func.pwdtk_decorated))
+    if hasattr(dispatch_func, "_decorated_by_pwdtk"):
+        logger.warning("login.view.dispatch already decorated by pwdtk")
         return dispatch_func
 
-    logger.exception("FUNC_NAME: %s", dispatch_func.__name__)
+    # logger.exception("FUNC_NAME: %s", dispatch_func.__name__)
 
+    @wraps(dispatch_func)
     def new_dispatch(self, request, *args, **kwargs):
         backend = MHPwdPolicyBackend.get_backend()
 
@@ -370,7 +374,7 @@ def watch_login_dispatch(dispatch_func):
 
         return rslt
 
-    new_dispatch.pwdtk_decorated = True
+    new_dispatch._decorated_by_pwdtk = True
 
     logger.debug("decorated the dispatch function")
 

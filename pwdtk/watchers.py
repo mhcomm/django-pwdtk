@@ -2,6 +2,8 @@ import datetime
 import logging
 import os
 
+from functools import wraps
+
 from pwdtk.helpers import recursion_depth
 from pwdtk.settings import PWDTK_PASSWD_HISTORY_LEN
 
@@ -16,9 +18,8 @@ def watch_set_password(orig_set_password):
         detect password changes
     """
 
-    if hasattr(orig_set_password, 'pwdtk_decorated'):
-        logger.warning("set_password already decorated by pwdtk: %s",
-                       repr(orig_set_password.pwdtk_decorated))
+    if hasattr(orig_set_password, '_decorated_by_pwdtk'):
+        logger.warning("set_password already decorated by pwdtk")
         return orig_set_password
 
     logger.debug("decorating %s", repr(orig_set_password))
@@ -26,6 +27,7 @@ def watch_set_password(orig_set_password):
     from pwdtk.auth_backends import MHPwdPolicyBackend
     UserData = MHPwdPolicyBackend.get_user_data_cls()
 
+    @wraps(orig_set_password)
     def decorated(self, password):
         passwd_str = password if LOG_PASSWORDS else '********'
         logger.debug(
@@ -60,6 +62,6 @@ def watch_set_password(orig_set_password):
             user_data.save()
         return orig_set_password(self, password)
 
-    decorated.pwdtk_decorated = True
+    decorated._decorated_by_pwdtk = True
 
     return decorated
