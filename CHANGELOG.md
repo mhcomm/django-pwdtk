@@ -1,5 +1,7 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v0.2.4](https://github.com/mhcomm/django-pwdtk/compare/0.2.3...v0.2.4)
+* fix bug #13 (potential issues with django introspection due to monkey patches
 ## [v0.2.3](https://github.com/mhcomm/django-pwdtk/compare/0.2.2...v0.2.3)
 * improve project description
 * improve README slightly
