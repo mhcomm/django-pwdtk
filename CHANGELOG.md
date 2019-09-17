@@ -1,14 +1,14 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
-## [v0.2.5](https://github.com/mhcomm/django-pwdtk/compare/0.2.4...v0.2.5)
+## [v0.2.5](https://github.com/mhcomm/django-pwdtk/compare/v0.2.4...v0.2.5)
 * fix requirements in order to remain py2 compatible (limit minibelt to < 0.2.0)
-## [v0.2.4](https://github.com/mhcomm/django-pwdtk/compare/0.2.3...v0.2.4)
+## [v0.2.4](https://github.com/mhcomm/django-pwdtk/compare/v0.2.3...v0.2.4)
 * fix bug #13 (potential issues with django introspection due to monkey patches
-## [v0.2.3](https://github.com/mhcomm/django-pwdtk/compare/0.2.2...v0.2.3)
+## [v0.2.3](https://github.com/mhcomm/django-pwdtk/compare/v0.2.2...v0.2.3)
 * improve project description
 * improve README slightly
 * update changelog
-## [v0.2.2](https://github.com/mhcomm/django-pwdtk/compare/0.2.1...v0.2.2)
+## [v0.2.2](https://github.com/mhcomm/django-pwdtk/compare/v0.2.1...v0.2.2)
 * fix bug #8 (recursion issue if password set with non default hash and user logs in)
 * add some CI test for py2 py3 django 1.8 / django 1.11
 * TODO: improve documentation / README / changelog
