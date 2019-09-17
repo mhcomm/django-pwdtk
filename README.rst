@@ -1,6 +1,10 @@
 PWDTK Password Tool Kit for Django
 ====================================
 
+.. image:: https://api.travis-ci.com/mhcomm/django-pwdtk.svg?branch=master
+    :target: https://travis-ci.com/mhcomm/django-pwdtk
+
+
 You use Django's default password authentification, but miss some tweaks
 like:
 * lockout after too many failed logins
