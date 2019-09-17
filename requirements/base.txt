@@ -1,3 +1,3 @@
 future
-minibelt
+minibelt<0.2.0
 python-dateutil
