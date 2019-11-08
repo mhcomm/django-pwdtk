@@ -14,7 +14,7 @@ def uniqify_pwd_data(apps, schema_editor):
     usr_w_cnt = PwdData.objects.all().values('username').annotate(
         ucnt=models.Count("username")).filter(ucnt__gt=1)
     for username in usr_w_cnt.values_list("username", flat=True):
-        print(username)
+        print("removing redundant PwdData entries for %r" % username)
         to_rm = PwdData.objects.filter(username=username).order_by("pk")[1:]
         for usr in to_rm:
             usr.delete()
