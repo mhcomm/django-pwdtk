@@ -13,9 +13,12 @@ class PwdData(models.Model):
     """ a model in case no custom way is specified for storing related data
     """
     user_id = models.PositiveIntegerField(null=True, blank=True, default=0)
-    username = models.CharField(max_length=80, null=True,
-                                blank=True, default='')
+    username = models.CharField(max_length=255, null=True,
+                                unique=True)
     data = jsonfield.JSONField(default={})
+
+    def __unicode__(self):
+        return("%r, %r" % (self.user_id, self.username))
 
     def locked_out(self):
         """ whether user is locked out or not """
