@@ -1,5 +1,7 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v0.2.6](https://github.com/mhcomm/django-pwdtk/compare/v0.2.5...v0.2.6)
+* add migrations to force uniqueness on PwdData (PwdData.username should be unique)
 ## [v0.2.5](https://github.com/mhcomm/django-pwdtk/compare/v0.2.4...v0.2.5)
 * fix requirements in order to remain py2 compatible (limit minibelt to < 0.2.0)
 ## [v0.2.4](https://github.com/mhcomm/django-pwdtk/compare/v0.2.3...v0.2.4)
