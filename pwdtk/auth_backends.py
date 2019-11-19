@@ -25,6 +25,7 @@ from pwdtk.helpers import seconds_to_iso8601
 logger = logging.getLogger(__name__)
 # logger.debug("######## Imp backend2")  # for debugging dj 1.8 -> 1.11
 
+PWDTK_ENABLED = settings.PWDTK_ENABLED
 PWDTK_USER_FAILURE_LIMIT = settings.PWDTK_USER_FAILURE_LIMIT
 PWDTK_IP_FAILURE_LIMIT = settings.PWDTK_IP_FAILURE_LIMIT
 PWDTK_LOCKOUT_TIME = settings.PWDTK_LOCKOUT_TIME
@@ -141,6 +142,9 @@ class MHPwdPolicyBackend(object):
 
     def authenticate(self, request=None, username=None, password=None,
                      **kwargs):
+        if not PWDTK_ENABLED:
+            return None
+
         logger.debug(
             "############## MHAUTH: %s %s %s %s",
             repr(request), repr(username), repr(password), repr(kwargs))
