@@ -53,11 +53,12 @@ flake2:
     - python -V
     - pip install -U flake8
     - pip freeze > pipfreeze.txt
-    - python -m flake8 pwdtk --exclude=pwdtk/testproject/manage21.py
+    - python -m flake8 pwdtk --exclude=pwdtk/testproject/manage21.py | tee flake.log
   artifacts:
     when: always
     paths:
         - pipfreeze.txt
+        - flake.log
     expire_in: 1 month
 
 
@@ -75,11 +76,12 @@ flake3:
     - python -V
     - pip install -U flake8
     - pip freeze > pipfreeze.txt
-    - python -m flake8 pwdtk
+    - python -m flake8 pwdtk | tee flake.log
   artifacts:
     when: always
     paths:
         - pipfreeze.txt
+        - flake.log
     expire_in: 1 month
 
 
