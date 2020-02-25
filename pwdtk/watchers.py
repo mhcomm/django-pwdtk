@@ -43,10 +43,10 @@ def watch_set_password(orig_set_password):
             logger.debug("no username specified. Watcher has nothing to do")
             return orig_set_password(self, password)
         if depth > 0:
-            # TODO: instead of detecting a recursion we night try to detect, whether
-            # this function si being called during a login. This might be less obscure
-            # but perhaps less safe. detecting recursions will always avoid endless
-            # recursions
+            # TODO: instead of detecting a recursion we might try to detect,
+            # whether this function si being called during a login. This
+            # might be less obscure but perhaps less safe. detecting
+            # recursions will always avoid endless recursions
             logger.debug("recursion detected. abandon pwd_change intercept")
             return orig_set_password(self, password)
         changed = not self.check_password(password)
