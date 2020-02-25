@@ -1,5 +1,7 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v0.2.7](https://github.com/mhcomm/django-pwdtk/compare/v0.2.6...v0.2.7)
+* same as 0.2.7, but rebuilt somehow a bad migration file slipped into the release
 ## [v0.2.6](https://github.com/mhcomm/django-pwdtk/compare/v0.2.5...v0.2.6)
 * add migrations to force uniqueness on PwdData (PwdData.username should be unique)
 ## [v0.2.5](https://github.com/mhcomm/django-pwdtk/compare/v0.2.4...v0.2.5)
