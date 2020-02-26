@@ -1,3 +1,4 @@
 -r tox.txt
 django<1.9
-django-jsonfield
+django-jsonfield<1.1
+jsonfield<2.1

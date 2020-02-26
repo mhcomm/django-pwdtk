@@ -3,7 +3,7 @@
     key: "$CI_BUILD_REF_NAME"
     paths:
       - eenv/
-      - eenv3/
+      - eenv2/
 
 stages:
     - lint
@@ -14,12 +14,24 @@ variables:
 
 before_script:
     - "[ -s \"$HOME/.gitlab_runner.sh\" ] && . $HOME/.gitlab_runner.sh"
-    - "[ -s 'eenv/bin/activate' ] || virtualenv eenv"
-    - "[ -s 'eenv3/bin/activate' ] || virtualenv eenv3 -p $(which python3.5 | which python3)"
     - git submodule sync --recursive
     - git submodule foreach --recursive git clean -fxd
     - git submodule update --init --recursive --force
+    # install or update venv for python2
+    - "PYV=$($(which python2.7) -V 2>&1)"
+    - "[ -s 'eenv2/bin/activate' ] || virtualenv eenv2 -p $(which python2.7)"
+    - "VENVPYV=$(eenv2/bin/python -V 2>&1)"
+    # delete venv if python versions changed
+    - '[ "$PYV" = "$VENVPYV" ] || ( rm -rf eenv2 ; virtualenv eenv2 -p $(which python2.7))'
     # for debugging some weird issues on some ci runners
+    # install or update venv for python3
+    - "PYV=$($(which python3.6 || which python3.7) -V 2>&1)"
+    - "[ -s 'eenv/bin/activate' ] || virtualenv eenv -p $(which python3.6 || which python3.7)"
+    - "VENVPYV=$(eenv/bin/python -V 2>&1)"
+    # delete venv if python versions changed
+    - '[ "$PYV" = "$VENVPYV" ] || ( rm -rf eenv ; virtualenv eenv -p $(which python3.6 || which python3.7))'
+    #
+    - "[ -s 'eenv/bin/activate' ] && . eenv/bin/activate"
     - locale
     - which python
 
@@ -37,10 +49,17 @@ flake2:
       when:
         - runner_system_failure
   script:
-    - "[ -s 'eenv/bin/activate' ] && . eenv/bin/activate"
+    - ". eenv2/bin/activate"
     - python -V
     - pip install -U flake8
-    - python -m flake8 pwdtk --exclude=pwdtk/testproject/manage21.py
+    - pip freeze > pipfreeze.txt
+    - python -m flake8 pwdtk --exclude=pwdtk/testproject/manage21.py | tee flake.log
+  artifacts:
+    when: always
+    paths:
+        - pipfreeze.txt
+        - flake.log
+    expire_in: 1 month
 
 
 flake3:
@@ -53,10 +72,17 @@ flake3:
       when:
         - runner_system_failure
   script:
-    - "[ -s 'eenv3/bin/activate' ] && . eenv3/bin/activate"
+    - ". eenv/bin/activate"
     - python -V
     - pip install -U flake8
-    - python -m flake8 pwdtk
+    - pip freeze > pipfreeze.txt
+    - python -m flake8 pwdtk | tee flake.log
+  artifacts:
+    when: always
+    paths:
+        - pipfreeze.txt
+        - flake.log
+    expire_in: 1 month
 
 
 
@@ -73,6 +99,7 @@ test_18:
       when:
         - runner_system_failure
   script:
+    - ". eenv/bin/activate"
     - python -V
     - pip install -U tox
     - tox -e py27-django18,py35-django18,py36-django18
@@ -87,6 +114,7 @@ test_1:
       when:
         - runner_system_failure
   script:
+    - ". eenv/bin/activate"
     - python -V
     - pip install -U tox
     - tox -e py27-django1,py35-django1,py36-django1
@@ -101,6 +129,7 @@ test_21:
       when:
         - runner_system_failure
   script:
+    - ". eenv/bin/activate"
     - python -V
     - pip install -U tox
     - tox -e py35-django21,py36-django21
