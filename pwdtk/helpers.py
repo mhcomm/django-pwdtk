@@ -93,9 +93,9 @@ class PwdtkSettingsType(type):
         return getattr(settings, key)
 
 
-class PwdtkSettings:
-
-    if getattr(settings, 'PWDTK_CUSTOM_SETTINGS_CLS', None):
-        __metaclass__ = _resolve_object_path(settings.PWDTK_CUSTOM_SETTINGS_CLS)
-    else:
-        __metaclass__ = PwdtkSettingsType
+if getattr(settings, 'PWDTK_CUSTOM_SETTINGS_CLS', None):
+    class PwdtkSettings(six.with_metaclass(_resolve_object_path(settings.PWDTK_CUSTOM_SETTINGS_CLS))):
+        pass
+else:
+    class PwdtkSettings(six.with_metaclass(PwdtkSettingsType)):
+        pass
