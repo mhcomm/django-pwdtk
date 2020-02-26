@@ -1,5 +1,8 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v0.2.8](https://github.com/mhcomm/django-pwdtk/compare/v0.2.7...v0.2.8)
+* fix CI runners (limit max version for some packages)
+* allow to completely disable pwdtk
 ## [v0.2.7](https://github.com/mhcomm/django-pwdtk/compare/v0.2.6...v0.2.7)
 * same as 0.2.7, but rebuilt somehow a bad migration file slipped into the release
 ## [v0.2.6](https://github.com/mhcomm/django-pwdtk/compare/v0.2.5...v0.2.6)
