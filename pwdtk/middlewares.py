@@ -1,7 +1,6 @@
 import json
 import logging
 
-from django.conf import settings
 from django.core.exceptions import MiddlewareNotUsed
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -9,15 +8,15 @@ from django.utils.deprecation import MiddlewareMixin
 
 from pwdtk.auth_backends import lockout_response
 from pwdtk.auth_backends import MHPwdPolicyBackend
+from pwdtk.helpers import PwdtkSettings
 
 
 logger = logging.getLogger(__name__)
-PWDTK_PASSWD_CHANGE_VIEW = settings.PWDTK_PASSWD_CHANGE_VIEW
 
 
 class PwdtkMiddleware(MiddlewareMixin):
     def __init__(self, get_response):
-        if not settings.PWDTK_ENABLED:
+        if not PwdtkSettings.PWDTK_ENABLED:
             logger.debug("PWDTK middleware is disabled")
             raise MiddlewareNotUsed("pwdtk is disabled")
         super(PwdtkMiddleware, self).__init__(get_response)
@@ -56,5 +55,5 @@ class PwdtkMiddleware(MiddlewareMixin):
                 backend = MHPwdPolicyBackend.get_backend()
                 return lockout_response(request, backend)
             if fail_reason == "pwd_obsolete":
-                return redirect(PWDTK_PASSWD_CHANGE_VIEW)
+                return redirect(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW)
         return response

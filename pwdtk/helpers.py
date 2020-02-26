@@ -4,7 +4,9 @@ from __future__ import print_function
 import inspect
 import datetime
 import dateutil
+import six
 
+from django.conf import settings
 
 def get_delta_seconds(timestr, now=None):
     if not timestr:
@@ -72,3 +74,28 @@ def recursion_depth():
         if path == top_frame[0] and func_name == top_frame[2]:
             counter += 1
     return counter
+
+
+def _resolve_object_path(dotted_name):
+    if isinstance(dotted_name, six.string_types):
+        path = dotted_name.split('.')
+        module = __import__(dotted_name.rsplit('.', 1)[0])
+        for item in path[1:-1]:
+            module = getattr(module, item)
+        return getattr(module, path[-1])
+
+    return dotted_name
+
+
+class PwdtkSettingsType(type):
+
+    def __getattr__(cls, key):
+        return getattr(settings, key)
+
+
+class PwdtkSettings:
+
+    if getattr(settings, 'PWDTK_CUSTOM_SETTINGS_CLS', None):
+        __metaclass__ = _resolve_object_path(settings.PWDTK_CUSTOM_SETTINGS_CLS)
+    else:
+        __metaclass__ = PwdtkSettingsType

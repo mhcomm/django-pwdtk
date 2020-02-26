@@ -5,7 +5,7 @@ import os
 from functools import wraps
 
 from pwdtk.helpers import recursion_depth
-from pwdtk.settings import PWDTK_PASSWD_HISTORY_LEN
+from pwdtk.helpers import PwdtkSettings
 
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ def watch_set_password(orig_set_password):
             now = datetime.datetime.now().isoformat()
             orig_set_password(self, password)
             pwd_history.insert(0, (now, self.password))
-            pwd_history[PWDTK_PASSWD_HISTORY_LEN:] = []
+            pwd_history[PwdtkSettings.PWDTK_PASSWD_HISTORY_LEN:] = []
             user_data.save()
         return orig_set_password(self, password)
 

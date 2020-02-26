@@ -11,7 +11,6 @@ from functools import wraps
 import dateutil.parser
 import minibelt
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
@@ -21,20 +20,10 @@ from django.shortcuts import render
 from pwdtk.exceptions import PwdTkMustChangePassword
 from pwdtk.helpers import get_delta_seconds
 from pwdtk.helpers import seconds_to_iso8601
+from pwdtk.helpers import PwdtkSettings
 
 logger = logging.getLogger(__name__)
 # logger.debug("######## Imp backend2")  # for debugging dj 1.8 -> 1.11
-
-PWDTK_ENABLED = settings.PWDTK_ENABLED
-PWDTK_USER_FAILURE_LIMIT = settings.PWDTK_USER_FAILURE_LIMIT
-PWDTK_IP_FAILURE_LIMIT = settings.PWDTK_IP_FAILURE_LIMIT
-PWDTK_LOCKOUT_TIME = settings.PWDTK_LOCKOUT_TIME
-PWDTK_LOCKOUT_TEMPLATE = settings.PWDTK_LOCKOUT_TEMPLATE
-PWDTK_USER_PARAMS = settings.PWDTK_USER_PARAMS
-PWDTK_USERNAME_FORM_FIELD = settings.PWDTK_USERNAME_FORM_FIELD
-PWDTK_PASSWD_AGE = settings.PWDTK_PASSWD_AGE
-PWDTK_PASSWD_CHANGE_TEMPLATE = settings.PWDTK_PASSWD_CHANGE_TEMPLATE
-PWDTK_PASSWD_CHANGE_VIEW = settings.PWDTK_PASSWD_CHANGE_VIEW
 
 
 class PwdtkPermissionDenied(PermissionDenied):
@@ -56,7 +45,7 @@ class MHPwdPolicyBackend(object):
     @classmethod
     def get_user_data_cls(cls):
         if not cls.UserDataCls:
-            cls.UserDataCls = minibelt.import_from_path(PWDTK_USER_PARAMS)
+            cls.UserDataCls = minibelt.import_from_path(PwdtkSettings.PWDTK_USER_PARAMS)
         return cls.UserDataCls
 
     def __init__(self, userdata_cls=None):
@@ -83,7 +72,7 @@ class MHPwdPolicyBackend(object):
         delta_secs = get_delta_seconds(user_data.fail_time)
         logger.debug("locked %s %s",
                      user_data.fail_time, delta_secs)
-        if delta_secs < PWDTK_LOCKOUT_TIME:
+        if delta_secs < PwdtkSettings.PWDTK_LOCKOUT_TIME:
             logger.debug("still locked")
             return True
         logger.debug("no more locked")
@@ -102,7 +91,7 @@ class MHPwdPolicyBackend(object):
         if not history:
             return False
         change_delta = get_delta_seconds(history[0][0])
-        return change_delta > settings.PWDTK_PASSWD_AGE
+        return change_delta > PwdtkSettings.PWDTK_PASSWD_AGE
 
     def check_tries_per_user(self, username, request=None):
         """ checks whether a user has more than the allowed amount of failed logins
@@ -121,7 +110,7 @@ class MHPwdPolicyBackend(object):
             t_fail = dateutil.parser.parse(user_data.fail_time)
             t_delta = datetime.datetime.utcnow() - t_fail
             age = t_delta.days * 86400 + t_delta.seconds
-            to_wait = PWDTK_LOCKOUT_TIME - age
+            to_wait = PwdtkSettings.PWDTK_LOCKOUT_TIME - age
             msg = ("user %s entered bad password too often (%d times)"
                    " (must wait %d seconds)"
                    % (username, user_data.failed_logins, to_wait))
@@ -142,7 +131,7 @@ class MHPwdPolicyBackend(object):
 
     def authenticate(self, request=None, username=None, password=None,
                      **kwargs):
-        if not PWDTK_ENABLED:
+        if not PwdtkSettings.PWDTK_ENABLED:
             return None
 
         logger.debug(
@@ -153,7 +142,7 @@ class MHPwdPolicyBackend(object):
             self.check_tries_per_user(username, request)
             return  # if check_tries_per_user didn't raise
 
-        if PWDTK_IP_FAILURE_LIMIT and request:
+        if PwdtkSettings.PWDTK_IP_FAILURE_LIMIT and request:
             return self.check_tries_per_ip(request)
 
     def clear_failed_logins(self, user):
@@ -170,16 +159,16 @@ class MHPwdPolicyBackend(object):
             shall detect failed logins with username and password
             and lock out the user if too many login fails occured
         """
-        if PWDTK_USER_FAILURE_LIMIT is None:
+        if PwdtkSettings.PWDTK_USER_FAILURE_LIMIT is None:
             return 0
         logger.debug("failed login for %s", username)
         data = self.userdata_cls(username=username)
         data.fail_time = datetime.datetime.utcnow().isoformat()
         data.failed_logins = failed_logins = data.failed_logins + 1
-        if failed_logins >= PWDTK_USER_FAILURE_LIMIT:
+        if failed_logins >= PwdtkSettings.PWDTK_USER_FAILURE_LIMIT:
             data.locked = True
             logger.warning('User %s got logged out after %d login errors ',
-                           username, PWDTK_USER_FAILURE_LIMIT)
+                           username, PwdtkSettings.PWDTK_USER_FAILURE_LIMIT)
             if request:
                 request.pwdtk_fail_user = username
                 request.pwdtk_fail_reason = "lockout"
@@ -195,7 +184,7 @@ class MHPwdPolicyBackend(object):
         if not history:
             return
         change_delta = get_delta_seconds(history[0][0])
-        if change_delta > settings.PWDTK_PASSWD_AGE:
+        if change_delta > PwdtkSettings.PWDTK_PASSWD_AGE:
             raise PwdTkMustChangePassword(
                 "user %s must change his password" % username)
 
@@ -203,22 +192,22 @@ class MHPwdPolicyBackend(object):
 def lockout_response(request, backend, msg=''):
     """ create login response for locked out users
     """
-    username = request.POST.get(PWDTK_USERNAME_FORM_FIELD, '')
+    username = request.POST.get(PwdtkSettings.PWDTK_USERNAME_FORM_FIELD, '')
     context = {
-        'failure_limit': PWDTK_USER_FAILURE_LIMIT,
+        'failure_limit': PwdtkSettings.PWDTK_USER_FAILURE_LIMIT,
         'username': username,
         'msg': msg,
     }
 
-    if PWDTK_LOCKOUT_TIME:
+    if PwdtkSettings.PWDTK_LOCKOUT_TIME:
         context.update({'cooloff_time':
-                       seconds_to_iso8601(PWDTK_LOCKOUT_TIME)})
+                       seconds_to_iso8601(PwdtkSettings.PWDTK_LOCKOUT_TIME)})
 
         user_data = backend.userdata_cls(username=username)
         t_fail = dateutil.parser.parse(user_data.fail_time)
         t_delta = datetime.datetime.utcnow() - t_fail
         age = t_delta.days * 86400 + t_delta.seconds
-        to_wait = PWDTK_LOCKOUT_TIME - age
+        to_wait = PwdtkSettings.PWDTK_LOCKOUT_TIME - age
         to_wait_minutes, to_wait_seconds = divmod(to_wait, 60)
         to_wait_str = "%d minutes and %d seconds" % (
             to_wait_minutes, to_wait_seconds)
@@ -233,16 +222,16 @@ def lockout_response(request, backend, msg=''):
             content_type='application/json',
             status=403,
         )
-    if PWDTK_LOCKOUT_TEMPLATE:
-        return render(request, PWDTK_LOCKOUT_TEMPLATE, context, status=403)
+    if PwdtkSettings.PWDTK_LOCKOUT_TEMPLATE:
+        return render(request, PwdtkSettings.PWDTK_LOCKOUT_TEMPLATE, context, status=403)
 
 
 def change_passwd_response(request, backend, msg=''):
     """ create login response for locked out users
     """
-    username = request.POST.get(PWDTK_USERNAME_FORM_FIELD, '')
+    username = request.POST.get(PwdtkSettings.PWDTK_USERNAME_FORM_FIELD, '')
     context = {
-        'max_passwd_age': PWDTK_PASSWD_AGE,
+        'max_passwd_age': PwdtkSettings.PWDTK_PASSWD_AGE,
         'username': username,
         'msg': msg,
     }
@@ -256,11 +245,11 @@ def change_passwd_response(request, backend, msg=''):
             status=403,
         )
 
-    if PWDTK_PASSWD_CHANGE_TEMPLATE:
+    if PwdtkSettings.PWDTK_PASSWD_CHANGE_TEMPLATE:
         return render(
-            request, PWDTK_PASSWD_CHANGE_TEMPLATE, context, status=403)
+            request, PwdtkSettings.PWDTK_PASSWD_CHANGE_TEMPLATE, context, status=403)
 
-    return redirect(PWDTK_PASSWD_CHANGE_VIEW)
+    return redirect(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW)
 
 
 def watch_login(login_func):
@@ -284,7 +273,7 @@ def watch_login(login_func):
             return login_func(request, *args, **kwargs)
 
         logger.debug("intercepting POST to login")
-        username = request.POST[PWDTK_USERNAME_FORM_FIELD]
+        username = request.POST[PwdtkSettings.PWDTK_USERNAME_FORM_FIELD]
 
         try:
             # Check for lockout due to too many logins with wrong password
@@ -342,7 +331,7 @@ def watch_login_dispatch(dispatch_func):
             return dispatch_func(self, request, *args, **kwargs)
 
         logger.debug("intercepting POST to login.dispatch")
-        username = request.POST[PWDTK_USERNAME_FORM_FIELD]
+        username = request.POST[PwdtkSettings.PWDTK_USERNAME_FORM_FIELD]
 
         must_renew = False
         try:
@@ -386,6 +375,6 @@ def watch_login_dispatch(dispatch_func):
 
 
 def redirect_to_renew(request, *args, **kwargs):
-    renew_view = settings.PWDTK_PASSWD_CHANGE_VIEW
+    renew_view = PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW
     logger.debug("should redirect to %s", renew_view)
     return redirect(renew_view)
