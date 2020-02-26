@@ -21,9 +21,10 @@ class PwdTkConfig(AppConfig):
             The required hooks depend on the django version.
 
         """
-        # TODO: add hooks only if pwdtk feature needing the hook has been
-        # enabled
         logger.debug("PWDTK READY")
+        if not settings.PWDTK_ENABLED:
+            logger.debug("PWDTK DISABLED")
+            return
         if django.VERSION < (1, 11):
             # Connect Signals
             import pwdtk.sig_receivers  # noqa: F401

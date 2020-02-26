@@ -21,8 +21,13 @@ def add_middlewares(
 
     middlewares[idx:idx] = to_insert
 
+
 # PWDTK Common settings for login / logout views
 # ----------------------------------------------------------
+
+# Allow to completely enable / disable pwdtk
+# This should disable all hooks / middlewares and auth backends
+PWDTK_ENABLED = True
 
 
 # Model to be used for storing PWDTK related info
