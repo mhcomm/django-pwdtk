@@ -3,11 +3,10 @@ from __future__ import absolute_import
 
 import jsonfield
 
-from django.conf import settings
 from django.db import models
 
 from pwdtk.helpers import get_delta_seconds
-
+from pwdtk.helpers import PwdtkSettings
 
 class PwdData(models.Model):
     """ a model in case no custom way is specified for storing related data
@@ -26,7 +25,7 @@ class PwdData(models.Model):
         locked = data.get('locked')
         fail_age = get_delta_seconds(data.get('fail_time'))
         if locked:
-            if fail_age < settings.PWDTK_LOCKOUT_TIME:
+            if fail_age < PwdtkSettings.PWDTK_LOCKOUT_TIME:
                 return True
         return False
 
@@ -36,7 +35,7 @@ class PwdData(models.Model):
         locked = data.get('locked')
         fail_age = get_delta_seconds(data.get('fail_time'))
         if locked:
-            if fail_age < settings.PWDTK_LOCKOUT_TIME:
+            if fail_age < PwdtkSettings.PWDTK_LOCKOUT_TIME:
                 return 'true (%s) %ss' % (
                     data.get('failed_logins', '?'), fail_age)
         return 'false (%s)' % data.get('failed_logins', '?')
@@ -47,4 +46,4 @@ class PwdData(models.Model):
         if not history:
             return False
         change_delta = get_delta_seconds(history[0][0])
-        return change_delta > settings.PWDTK_PASSWD_AGE
+        return change_delta > PwdtkSettings.PWDTK_PASSWD_AGE
