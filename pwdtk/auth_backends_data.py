@@ -29,10 +29,7 @@ class UserData(object):
         if user:
             username = user.username
         elif username:
-            try:
-                user = User.objects.get(username=username)
-            except User.DoesNotExist:
-                user = None
+            user = User.objects.get(username=username)
         else:
             msg = "need either user or username"
             logger.error(msg)

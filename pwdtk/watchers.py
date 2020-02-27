@@ -24,8 +24,8 @@ def watch_set_password(orig_set_password):
 
     logger.debug("decorating %s", repr(orig_set_password))
 
-    from pwdtk.auth_backends import MHPwdPolicyBackend
-    UserData = MHPwdPolicyBackend.get_user_data_cls()
+    # from pwdtk.auth_backends import MHPwdPolicyBackend
+    # UserData = MHPwdPolicyBackend.get_user_data_cls()
 
     @wraps(orig_set_password)
     def decorated(self, password):
