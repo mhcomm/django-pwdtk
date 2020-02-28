@@ -1,11 +1,14 @@
 import json
 import logging
 
+
 from django.core.exceptions import MiddlewareNotUsed
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
 
-from pwdtk.views import lockout_response, password_change
+
+from pwdtk.views import lockout_response
 from pwdtk.helpers import PwdtkSettings
 
 
@@ -31,10 +34,10 @@ class PwdtkMiddleware(MiddlewareMixin):
         request.pwdtk_fail_reason = None
 
     def process_response(self, request, response):
-        if getattr(request, "pwdtk_fail_user", None):
+        if getattr(request, "pwdtk_fail", None):
             fail_reason = request.pwdtk_fail_reason
             context = {
-                'username': request.pwdtk_fail_user,
+                'username': request.pwdtk_user.username,
                 'fail_reason': fail_reason
                 }
             if fail_reason == "lockout":
@@ -51,9 +54,9 @@ class PwdtkMiddleware(MiddlewareMixin):
                     content_type='application/json',
                     status=403,
                     )
-            logger.debug("SHOULD REDIRECT for %s", request.pwdtk_fail_user)
+            logger.debug("SHOULD REDIRECT for %s", request.pwdtk_user.username)
             if fail_reason == "lockout":
-                return lockout_response(request, request.pwdtk_fail_user)
+                return lockout_response(request, request.pwdtk_user)
             if fail_reason == "pwd_obsolete":
-                return password_change(request)
+                return redirect(reverse("password_change"))
         return response

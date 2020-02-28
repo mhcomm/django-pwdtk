@@ -52,6 +52,10 @@ class UserData(object):
         self.data = self.pwd_data.data
 
     @property
+    def username(self):
+        return self.pwd_data.username
+
+    @property
     def failed_logins(self):
         return self.data.get('failed_logins', 0)
 
