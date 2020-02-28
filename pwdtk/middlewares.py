@@ -16,11 +16,16 @@ PWDTK_PASSWD_CHANGE_VIEW = settings.PWDTK_PASSWD_CHANGE_VIEW
 
 
 class PwdtkMiddleware(MiddlewareMixin):
-    def __init__(self, get_response):
+    def __init__(self, get_response=None):
         if not settings.PWDTK_ENABLED:
             logger.debug("PWDTK middleware is disabled")
             raise MiddlewareNotUsed("pwdtk is disabled")
-        super(PwdtkMiddleware, self).__init__(get_response)
+        if get_response:
+            super(PwdtkMiddleware, self).__init__(
+                get_response=get_response)
+        else:
+            super(PwdtkMiddleware, self).__init__()
+
 
     def process_request(self, request):
         logger.debug("PWDTK Proc Req %s %s", request.user, repr(request))
