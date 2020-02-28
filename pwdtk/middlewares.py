@@ -26,7 +26,6 @@ class PwdtkMiddleware(MiddlewareMixin):
         else:
             super(PwdtkMiddleware, self).__init__()
 
-
     def process_request(self, request):
         logger.debug("PWDTK Proc Req %s %s", request.user, repr(request))
         request.pwdtk_fail_user = None
