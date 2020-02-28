@@ -15,6 +15,9 @@ matrix:
    env: DJANGO_VERSION=18
  - python: 3.6
    env: DJANGO_VERSION=1
+# django 1_11 with old MIDDLEWARE_CLASSES
+ - python: 3.6
+   env: DJANGO_VERSION=1_11_mwc
 # - python: 3.6
 #   env: DJANGO_VERSION=21
 
