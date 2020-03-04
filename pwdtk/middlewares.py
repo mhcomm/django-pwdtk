@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 
@@ -33,11 +34,12 @@ class PwdtkMiddleware(MiddlewareMixin):
         request.pwdtk_fail_user = None
         request.pwdtk_fail_reason = None
 
+
     def process_response(self, request, response):
         if getattr(request, "pwdtk_fail", None):
             fail_reason = request.pwdtk_fail_reason
             context = {
-                'username': request.pwdtk_user.username,
+                'username': request.pwdtk_user.user.username,
                 'fail_reason': fail_reason
                 }
             if fail_reason == "lockout":
@@ -54,9 +56,15 @@ class PwdtkMiddleware(MiddlewareMixin):
                     content_type='application/json',
                     status=403,
                     )
-            logger.debug("SHOULD REDIRECT for %s", request.pwdtk_user.username)
+            logger.debug("SHOULD REDIRECT for %s", request.pwdtk_user.user.username)
+
             if fail_reason == "lockout":
-                return lockout_response(request, request.pwdtk_user)
+                context.update(self.handle_lockout_context(request.pwdtk_user))
+                if PwdtkSettings.PWDTK_LOCKOUT_VIEW:
+                    return redirect(reverse(PwdtkSettings.PWDTK_LOCKOUT_VIEW, kwargs=context))
+                return lockout_response(request, context)
+
             if fail_reason == "pwd_obsolete":
-                return redirect(reverse("password_change"))
+                return redirect(reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW, kwargs={"username":request.pwdtk_user.user.username, "next":"mc/2c0d10e_4/#/user/patient/1/stay/1/dashboard"}))
+
         return response

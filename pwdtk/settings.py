@@ -79,6 +79,8 @@ PWDTK_PASSWD_HISTORY_LEN = 3
 PWDTK_PASSWD_CHANGE_VIEW = "password_change"
 PWDTK_PASSWD_CHANGE_TEMPLATE = "login/passwd_change_simple.html"
 
+PWDTK_LOCKOUT_VIEW = None
+
 
 # for PWDTK unit testing.
 # --------------------------

@@ -10,19 +10,16 @@ import pytest
 
 
 from builtins import range
-from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.http.response import HttpResponseRedirect
 from django.test import Client
 
-from pwdtk.auth_backends import MHPwdPolicyBackend
 from pwdtk.tests.fixtures import two_users  # noqa: F401
+from pwdtk.helpers import PwdtkSettings
 
 
 logger = logging.getLogger(__name__)
 
-AUTH_URL = settings.PWDTK_TEST_ADMIN_URL
-UserData = MHPwdPolicyBackend.get_user_data_cls()
+AUTH_URL = PwdtkSettings.PWDTK_TEST_ADMIN_URL
 
 
 def do_login(client, data, use_good_password=True, shall_pass=None):
@@ -62,7 +59,7 @@ def do_login(client, data, use_good_password=True, shall_pass=None):
         assert status_code == 302
         assert resp.has_header('location')
         location = resp['location']
-        assert location.endswith(settings.PWDTK_TEST_ADMIN_URL)
+        assert location.endswith(PwdtkSettings.PWDTK_TEST_ADMIN_URL)
         logger.debug("login of %r/%r ok as expected",
                      username, password)
     else:
@@ -82,16 +79,16 @@ def do_login(client, data, use_good_password=True, shall_pass=None):
                 logger.debug("NO CONTEXT")
 
         if status_code == 302:  # should not pass
-            logger.debug("T_ADM_URL = %s", settings.PWDTK_TEST_ADMIN_URL)
+            logger.debug("T_ADM_URL = %s", PwdtkSettings.PWDTK_TEST_ADMIN_URL)
             logger.debug("location = %s", location)
 
-            assert not location.endswith(settings.PWDTK_TEST_ADMIN_URL)
+            assert not location.endswith(PwdtkSettings.PWDTK_TEST_ADMIN_URL)
         elif status_code == 200:
             answer = resp.content
-            assert settings.PWDTK_TEST_LOGIN_FAIL_SUBMSG in answer
+            assert PwdtkSettings.PWDTK_TEST_LOGIN_FAIL_SUBMSG in answer
         else:
             answer = resp.content
-            assert settings.PWDTK_TEST_LOCKOUT_SUBMSG in answer
+            assert PwdtkSettings.PWDTK_TEST_LOCKOUT_SUBMSG in answer
 
         data['password'] = password  # restore password
 
@@ -107,30 +104,15 @@ def do_logout(client):
     logger.debug("logout successful")
 
 
-def change_passwd(username, password):
-    """ changes password of a user """
-    User = get_user_model()
-    user = User.objects.get(username=username)
-    user.set_password(password)
-    user.save()
-
-
-def set_password_age(username, age, offset=0):
-    user_data = UserData(username=username)
-    pwd_hist = user_data.passwd_history
-    entry = pwd_hist[offset]
-    entry_date = (datetime.datetime.now() - datetime.timedelta(seconds=age))
-    entry[0] = entry_date.isoformat()
-    user_data.save()
-
-
 @pytest.mark.django_db
 def test_login_no_form(two_users):  # noqa: F811
     """ client login without the login url """
     browser = "Mozilla/5.0"
     client = Client(browser=browser)
 
-    username, password = two_users[0]
+    user = two_users[0]
+    username = user.username
+    password = user.raw_password
 
     # First successful login without form
     loggedin = client.login(username=username, password=password)
@@ -150,7 +132,9 @@ def test_login(two_users):  # noqa: F811
     browser = "Mozilla/5.0"
     client = Client(browser=browser)
 
-    username, password = two_users[0]
+    user = two_users[0]
+    username = user.username
+    password = user.raw_password
 
     # go to a login page and fetch csrf token
     url = AUTH_URL + "login/?next=" + AUTH_URL
@@ -171,7 +155,7 @@ def test_login(two_users):  # noqa: F811
     do_login(client, data)
     do_logout(client)
 
-    failure_limit = settings.PWDTK_USER_FAILURE_LIMIT
+    failure_limit = PwdtkSettings.PWDTK_USER_FAILURE_LIMIT
     if not failure_limit:
         logger.debug("PWDTK_USER_FAILURE_LIMIT not set. will skip test")
         return
@@ -203,13 +187,11 @@ def test_login(two_users):  # noqa: F811
     do_login(client, data, shall_pass=False)
 
     # now let's check out the lockout delay
-    user_data = UserData(username=username)
-    logger.debug("userdata : %s", repr(user_data.data))
-    assert user_data.locked
-    t_fail = dateutil.parser.parse(user_data.fail_time)
-    now = datetime.datetime.now()
-    delta = now - t_fail
-    logger.debug("AGE %s", delta.seconds)
+    # pwdtk data will be populate after first login attempt
+    user.refresh_from_db()
+    pwdtk_data = user.pwdtk_data
+    assert pwdtk_data.locked
+    logger.debug("AGE %s", (datetime.datetime.utcnow() - pwdtk_data.fail_time).total_seconds())
 
 
 @pytest.mark.django_db
@@ -221,11 +203,9 @@ def test_pwd_expire(two_users):  # noqa: F811
     browser = "Mozilla/5.0"
     client = Client(browser=browser)
 
-    username, password = two_users[0]
-    user_data = UserData(username=username)
-
-    pwd_hist = user_data.passwd_history
-    print("PWD_HIST = ", len(pwd_hist), pwd_hist)
+    user = two_users[0]
+    username = user.username
+    password = user.raw_password
 
     # # go to a login page and fetch csrf token
     url = AUTH_URL + "login/?next=" + AUTH_URL
@@ -236,7 +216,8 @@ def test_pwd_expire(two_users):  # noqa: F811
     # prepare post_data
 
     password += '1'
-    change_passwd(username, password)
+    user.set_password(password)
+    user.save()
 
     data = dict(
         username=username,
@@ -245,16 +226,13 @@ def test_pwd_expire(two_users):  # noqa: F811
         )
     do_login(client, data)
 
-    user_data = UserData(username=username)
-    pwd_hist = user_data.passwd_history
-    print("PWD_HIST = ", len(pwd_hist), pwd_hist)
+    # pwdtk data will be populate after first login
+    user.refresh_from_db()
+    pwdtk_data = user.pwdtk_data
 
     # make passwd obsolete
-    set_password_age(username, settings.PWDTK_PASSWD_AGE + 1)
-
-    user_data = UserData(username=username)
-    pwd_hist = user_data.passwd_history
-    print("PWD_HIST = ", len(pwd_hist), pwd_hist)
+    pwdtk_data.last_change_time = datetime.datetime.utcnow() - datetime.timedelta(seconds=age)
+    pwdtk_data.save()
 
     # now login should fail
     do_login(client, data, shall_pass=False)

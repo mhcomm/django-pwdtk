@@ -24,7 +24,8 @@ def two_users():
         usr.set_password(passwd)
         usr.is_staff = True
         usr.save()
+        usr.raw_password = passwd
         logger.debug("create user %r %r", username, passwd)
-        users.append((username, passwd))
+        users.append(usr)
 
     return users

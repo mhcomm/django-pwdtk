@@ -53,13 +53,13 @@ def watch_set_password(orig_set_password):
         logger.debug("changed = %s", changed)
         if changed:
             logger.debug("password change detected")
-            user_data = UserData(username=self.username)
-            pwd_history = user_data.passwd_history
-            now = datetime.datetime.now().isoformat()
             orig_set_password(self, password)
-            pwd_history.insert(0, (now, self.password))
-            pwd_history[PwdtkSettings.PWDTK_PASSWD_HISTORY_LEN:] = []
-            user_data.save()
+            if hasattr(self, 'pwdtk_data'):
+                now = datetime.datetime.utcnow()
+                self.pwdtk_data.password_history.insert(0, (now, self.password))
+                self.pwdtk_data.password_history[PwdtkSettings.PWDTK_PASSWD_HISTORY_LEN:] = []
+                self.pwdtk_data.last_change_time = now
+                self.pwdtk_data.save()
         return orig_set_password(self, password)
 
     decorated._decorated_by_pwdtk = True
