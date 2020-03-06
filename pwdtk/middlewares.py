@@ -2,6 +2,7 @@ import datetime
 import json
 import logging
 
+from six.moves.urllib.parse import urlencode
 
 from django.core.exceptions import MiddlewareNotUsed
 from django.core.urlresolvers import reverse
@@ -56,15 +57,22 @@ class PwdtkMiddleware(MiddlewareMixin):
                     content_type='application/json',
                     status=403,
                     )
-            logger.debug("SHOULD REDIRECT for %s", request.pwdtk_user.user.username)
-
+            next = request.POST.get('next')
             if fail_reason == "lockout":
-                context.update(self.handle_lockout_context(request.pwdtk_user))
                 if PwdtkSettings.PWDTK_LOCKOUT_VIEW:
-                    return redirect(reverse(PwdtkSettings.PWDTK_LOCKOUT_VIEW, kwargs=context))
+                    context = request.pwdtk_user.get_lockout_context()
+                    if next:
+                        context["next"] = next
+                    return redirect("%s?%s" % (reverse(PwdtkSettings.PWDTK_LOCKOUT_VIEW), urlencode(context)))
+
+                context.update(self.handle_lockout_context(request.pwdtk_user))
                 return lockout_response(request, context)
 
             if fail_reason == "pwd_obsolete":
-                return redirect(reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW, kwargs={"username":request.pwdtk_user.user.username, "next":"mc/2c0d10e_4/#/user/patient/1/stay/1/dashboard"}))
+                if PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW:
+                    context = request.pwdtk_user.get_pwd_obsolete_context()
+                    if next:
+                        context["next"] = next
+                    return redirect("%s?%s" % (reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW), urlencode(context)))
 
         return response

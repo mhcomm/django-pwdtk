@@ -40,3 +40,18 @@ class PwdData(models.Model):
         """ determines whether a user must renew his password
         """
         return (datetime.datetime.utcnow() - self.last_change_time).total_seconds() > PwdtkSettings.PWDTK_PASSWD_AGE
+
+    def get_pwd_obsolete_context(self):
+        return {
+            "username": self.user.username,
+            "password_age": PwdtkSettings.PWDTK_PASSWD_AGE,
+        }
+
+    def get_lockout_context(self):
+
+        return {
+            "username": self.user.username,
+            "lockout_time": PwdtkSettings.PWDTK_LOCKOUT_TIME,
+            "failed_logins": self.failed_logins,
+            "fail_time": self.fail_time.isoformat(),
+        }

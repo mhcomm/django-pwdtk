@@ -41,7 +41,6 @@ class PwdtkBackend(ModelBackend):
             user = UserModel._default_manager.get_by_natural_key(username)
             self.get_or_create_pwd_data_for_user(user)
             if user.pwdtk_data.is_locked():
-
                 request.pwdtk_fail = True
                 request.pwdtk_fail_reason = "lockout"
                 request.pwdtk_user = user.pwdtk_data
@@ -63,16 +62,18 @@ class PwdtkBackend(ModelBackend):
             else:
                 if PwdtkSettings.PWDTK_USER_FAILURE_LIMIT is None:
                     return None
-                user.pwdtk_data.failed_logins += 1
-                user.pwdtk_data.fail_time = datetime.datetime.utcnow()
+
                 if user.pwdtk_data.failed_logins >= PwdtkSettings.PWDTK_USER_FAILURE_LIMIT:
                     user.pwdtk_data.locked = True
+                    user.pwdtk_data.fail_time = datetime.datetime.utcnow()
                     user.pwdtk_data.save()
                     request.pwdtk_fail = True
                     request.pwdtk_fail_reason = "lockout"
                     request.pwdtk_user = user.pwdtk_data
                     raise PwdtkPermissionDenied
-                user.pwdtk_data.save()
+                else:
+                    user.pwdtk_data.failed_logins += 1
+                    user.pwdtk_data.save()
         except UserModel.DoesNotExist:
             # Run the default password hasher once to reduce the timing
             # difference between an existing and a non-existing user (#20760).
