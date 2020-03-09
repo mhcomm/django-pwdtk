@@ -59,6 +59,7 @@ def watch_set_password(orig_set_password):
                 self.pwdtk_data.password_history.insert(0, (now, self.password))
                 self.pwdtk_data.password_history[PwdtkSettings.PWDTK_PASSWD_HISTORY_LEN:] = []
                 self.pwdtk_data.last_change_time = now
+                self.pwdtk_data.must_renew = False
                 self.pwdtk_data.save()
         return orig_set_password(self, password)
 

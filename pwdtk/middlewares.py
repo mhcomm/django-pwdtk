@@ -4,14 +4,17 @@ import logging
 
 from six.moves.urllib.parse import urlencode
 
+
 from django.core.exceptions import MiddlewareNotUsed
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 
 
 from pwdtk.views import lockout_response
 from pwdtk.helpers import PwdtkSettings
+from pwdtk.models import PwdData
 
 
 logger = logging.getLogger(__name__)
@@ -36,7 +39,22 @@ class PwdtkMiddleware(MiddlewareMixin):
         request.pwdtk_fail_reason = None
 
 
+    def process_request(self, request):
+
+        if (request.method != 'GET' and request.user.is_authenticated()
+          and PwdData.get_or_create_for_user(request.user).must_renew):
+            if (request.path != reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW) and
+              request.path not in PwdtkSettings.PWDTK_PASSWD_CHANGE_ALLOWED_PATHS):
+                return redirect(reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW))
+
     def process_response(self, request, response):
+
+        if (request.method != 'GET' and request.user.is_authenticated() and
+          PwdData.get_or_create_for_user(request.user).must_renew and
+          request.path not in PwdtkSettings.PWDTK_PASSWD_CHANGE_ALLOWED_PATHS):
+            if request.path != reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW):
+                return redirect(reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW))
+
         if getattr(request, "pwdtk_fail", None):
             fail_reason = request.pwdtk_fail_reason
             context = {
@@ -69,10 +87,6 @@ class PwdtkMiddleware(MiddlewareMixin):
                 return lockout_response(request, context)
 
             if fail_reason == "pwd_obsolete":
-                if PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW:
-                    context = request.pwdtk_user.get_pwd_obsolete_context()
-                    if next:
-                        context["next"] = next
-                    return redirect("%s?%s" % (reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW), urlencode(context)))
+                return redirect(reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW))
 
         return response

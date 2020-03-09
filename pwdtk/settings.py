@@ -57,8 +57,9 @@ PWDTK_USERNAME_FORM_FIELD = 'username'
 # the field in the login form, that contains the password
 # PWDTK_PASSWORD_FORM_FIELD = 'username'
 
-# Name of the template to be used when a user is locked out
-PWDTK_LOCKOUT_TEMPLATE = 'login/locked_out_simple.html'
+
+
+
 
 PWDTK_IP_FAILURE_LIMIT = 0
 
@@ -77,10 +78,13 @@ PWDTK_PASSWD_HISTORY_LEN = 3
 
 # template to display for password renewal
 PWDTK_PASSWD_CHANGE_VIEW = "password_change"
-PWDTK_PASSWD_CHANGE_TEMPLATE = "login/passwd_change_simple.html"
 
+
+PWDTK_PASSWD_CHANGE_ALLOWED_PATHS = []
+
+# Name of the template to be used when a user is locked out
 PWDTK_LOCKOUT_VIEW = None
-
+PWDTK_LOCKOUT_TEMPLATE = 'login/locked_out_simple.html'
 
 # for PWDTK unit testing.
 # --------------------------

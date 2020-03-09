@@ -19,8 +19,15 @@ class PwdData(models.Model):
     locked = models.BooleanField(default=False)
     failed_logins = models.PositiveIntegerField(default=0)
     fail_time = models.DateTimeField(null=True)
+    must_renew = models.BooleanField(default=False)
     last_change_time = models.DateTimeField(default=datetime.datetime.utcnow)
     password_history = jsonfield.JSONField(default=[])
+
+    @classmethod
+    def get_or_create_for_user(cls, user):
+        if not hasattr(user, 'pwdtk_data'):
+            user.pwdtk_data = cls.objects.create(user=user)
+        return user.pwdtk_data
 
     def __str__(self):
         return("%r, %r" % (self.user.id, self.user.username))
@@ -36,16 +43,10 @@ class PwdData(models.Model):
         self.save()
         return False
 
-    def must_renew(self):
+    def compute_must_renew(self):
         """ determines whether a user must renew his password
         """
         return (datetime.datetime.utcnow() - self.last_change_time).total_seconds() > PwdtkSettings.PWDTK_PASSWD_AGE
-
-    def get_pwd_obsolete_context(self):
-        return {
-            "username": self.user.username,
-            "password_age": PwdtkSettings.PWDTK_PASSWD_AGE,
-        }
 
     def get_lockout_context(self):
 
