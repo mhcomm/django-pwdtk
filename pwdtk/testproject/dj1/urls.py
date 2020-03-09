@@ -22,7 +22,6 @@ from django.contrib import admin
 from pwdtk.testviews import home
 from pwdtk.testviews import logout_view
 from pwdtk.testviews import protected
-from pwdtk.views import password_change
 
 urlpatterns = [
     url(r'^$', home, name='pwdtk_test_home'),
