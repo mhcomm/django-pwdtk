@@ -34,7 +34,7 @@ ALLOWED_HOSTS = []
 
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    'pwdtk.auth_backends.PwdtkBackend',
     ]
 
 # Application definition
@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'pwdtk.middlewares.PwdtkMiddleware',
 ]
 
 ROOT_URLCONF = 'pwdtk.testproject.dj1.urls'
@@ -69,8 +70,6 @@ ROOT_URLCONF = 'pwdtk.testproject.dj1.urls'
 # For MH authentification back end
 # TODO: refactor and move into separate app
 import pwdtk.settings  # noqa E402
-pwdtk.settings.add_backend(AUTHENTICATION_BACKENDS)
-pwdtk.settings.add_middlewares(MIDDLEWARE)
 from pwdtk.settings import *  # noqa F401
 
 

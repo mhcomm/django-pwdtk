@@ -10,8 +10,11 @@ import pytest
 
 
 from builtins import range
+from django.contrib.auth import get_user_model
 from django.http.response import HttpResponseRedirect
+from django.http import HttpRequest
 from django.test import Client
+from django.utils import timezone
 
 from pwdtk.tests.fixtures import two_users  # noqa: F401
 from pwdtk.helpers import PwdtkSettings
@@ -20,49 +23,11 @@ from pwdtk.helpers import PwdtkSettings
 logger = logging.getLogger(__name__)
 
 AUTH_URL = PwdtkSettings.PWDTK_TEST_ADMIN_URL
+User = get_user_model()
 
 
-def do_login(client, data, use_good_password=True, shall_pass=None):
-    """ helper to simulate logins via the admin login form.
-        Logins with good or bad password can be simulated.
-        Checks will be performed to see whether login success / failure is
-        as expected.
-        :param client: client object
-        :param data: form data (username, password, csrf_token, ...)
-        :param use_good_password: if set to false a bad password will be used
-        :param shall_pass:  indicates the expacted behaviour
-                            (failed login, passed login)
-                            If set to None, then it is set to use_good_password
-    """
-    username = data['username']
-    password = data['password']
-
-    if not use_good_password:
-        data['password'] = password + 'a'
-
-    if shall_pass is None:
-        shall_pass = use_good_password
-
-    url = AUTH_URL + "login/?next=" + AUTH_URL
-    logger.debug("loginurl = %s", url)
-    resp = client.post(url, data=data)
-    status_code = int(resp.status_code)
-
-    location = None
-    if status_code == 302:
-        location = resp['location']
-
-    logger.debug("LOCATION %s", location)
-
-    if shall_pass:
-        assert isinstance(resp, HttpResponseRedirect)
-        assert status_code == 302
-        assert resp.has_header('location')
-        location = resp['location']
-        assert location.endswith(PwdtkSettings.PWDTK_TEST_ADMIN_URL)
-        logger.debug("login of %r/%r ok as expected",
-                     username, password)
-    else:
+def nada():
+    if not True:
         logger.debug('status_code %s %s', type(status_code), repr(status_code))
         if status_code == 302:
             logger.debug("RESP TYPE %s", type(resp))
@@ -89,7 +54,45 @@ def do_login(client, data, use_good_password=True, shall_pass=None):
         else:
             answer = resp.content
             assert PwdtkSettings.PWDTK_TEST_LOCKOUT_SUBMSG in answer
+    else:
+        assert isinstance(resp, HttpResponseRedirect)
+        assert status_code == 302
+        assert resp.has_header('location')
+        location = resp['location']
+        assert location.endswith(PwdtkSettings.PWDTK_TEST_ADMIN_URL)
+        logger.debug("login of %r/%r ok as expected",
+                     username, password)
 
+def do_login(client, data, use_good_password=True, shall_pass=None):
+    """ helper to simulate logins via the admin login form.
+        Logins with good or bad password can be simulated.
+        Checks will be performed to see whether login success / failure is
+        as expected.
+        :param client: client object
+        :param data: form data (username, password, csrf_token, ...)
+        :param use_good_password: if set to false a bad password will be used
+        :param shall_pass:  indicates the expacted behaviour
+                            (failed login, passed login)
+                            If set to None, then it is set to use_good_password
+    """
+    username = data['username']
+    password = data['password']
+
+    if not use_good_password:
+        data['password'] = password + 'a'
+
+    if shall_pass is None:
+        shall_pass = use_good_password
+
+    url = AUTH_URL + "login/?next=" + AUTH_URL
+    logger.debug("loginurl = %s", url)
+    resp = client.post(url, data=data)
+
+
+    if shall_pass:
+        assert '_auth_user_id' in client.session
+    else:
+        assert '_auth_user_id' not in client.session
         data['password'] = password  # restore password
 
     return resp
@@ -113,15 +116,16 @@ def test_login_no_form(two_users):  # noqa: F811
     user = two_users[0]
     username = user.username
     password = user.raw_password
-
+    request = HttpRequest()
     # First successful login without form
-    loggedin = client.login(username=username, password=password)
+    loggedin = client.login(username=username, password=password, request=request)
     print("%s %s -> %s" % (username, password, loggedin))
     assert loggedin is True
 
     # login with bad password fails without form
+    request = HttpRequest()
     bad_pwd = password + 'a'
-    loggedin = client.login(username=username, password=bad_pwd)
+    loggedin = client.login(username=username, password=bad_pwd, request=request)
     print("%s %s -> %s" % (username, bad_pwd, loggedin))
     assert loggedin is False
 
@@ -178,20 +182,17 @@ def test_login(two_users):  # noqa: F811
 
     # Now the final bad login
     resp = do_login(client, data, use_good_password=False)
-    if django.VERSION < (1, 11):
-        assert resp.status_code == 200
-    else:
-        assert resp.status_code == 403
+    assert resp.status_code == 403
 
     # Now logging in should fail
     do_login(client, data, shall_pass=False)
 
     # now let's check out the lockout delay
     # pwdtk data will be populate after first login attempt
-    user.refresh_from_db()
+    user = User.objects.get(username=username)
     pwdtk_data = user.pwdtk_data
     assert pwdtk_data.locked
-    logger.debug("AGE %s", (datetime.datetime.utcnow() - pwdtk_data.fail_time).total_seconds())
+    logger.debug("AGE %i", pwdtk_data.fail_age)
 
 
 @pytest.mark.django_db
@@ -227,12 +228,24 @@ def test_pwd_expire(two_users):  # noqa: F811
     do_login(client, data)
 
     # pwdtk data will be populate after first login
-    user.refresh_from_db()
+    user = User.objects.get(username=username)
     pwdtk_data = user.pwdtk_data
 
     # make passwd obsolete
-    pwdtk_data.last_change_time = datetime.datetime.utcnow() - datetime.timedelta(seconds=age)
+    pwdtk_data.last_change_time = timezone.now() - datetime.timedelta(seconds=PwdtkSettings.PWDTK_PASSWD_AGE)
     pwdtk_data.save()
+    assert pwdtk_data.compute_must_renew()
 
     # now login should fail
-    do_login(client, data, shall_pass=False)
+    do_login(client, data)
+
+    user = User.objects.get(username=username)
+    assert user.pwdtk_data.must_renew
+
+    user.set_password(password)
+    user.save()
+    assert user.pwdtk_data.must_renew
+
+    user.set_password(password+"2")
+    user.save()
+    assert not user.pwdtk_data.must_renew

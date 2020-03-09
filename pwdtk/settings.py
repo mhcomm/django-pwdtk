@@ -1,27 +1,6 @@
 import django
 
 
-def add_backend(backends):
-    """ adds auth backend depending on django version
-    """
-    if django.VERSION >= (1, 11):
-        backends.insert(
-            0, 'pwdtk.auth_backends.MHPwdPolicyBackend')
-
-
-def add_middlewares(
-        middlewares,
-        after='django.contrib.auth.middleware.AuthenticationMiddleware'):
-    """ adds middlewares depending on django.VERSION """
-    assert type(middlewares) is list
-    idx = middlewares.index(after) + 1
-    to_insert = []
-    if django.VERSION >= (1, 11):
-        to_insert.append('pwdtk.middlewares.PwdtkMiddleware')
-
-    middlewares[idx:idx] = to_insert
-
-
 # PWDTK Common settings for login / logout views
 # ----------------------------------------------------------
 

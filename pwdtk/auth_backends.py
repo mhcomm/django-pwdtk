@@ -2,7 +2,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import datetime
 import logging
 
 from django.contrib.auth import get_user_model
@@ -31,28 +30,27 @@ class PwdtkBackend(ModelBackend):
         try:
             user = UserModel._default_manager.get_by_natural_key(username)
             pwdtk_data = PwdData.get_or_create_for_user(user)
+            request.pwdtk_user = pwdtk_data
             if pwdtk_data.is_locked():
                 request.pwdtk_fail = True
                 request.pwdtk_fail_reason = "lockout"
                 request.pwdtk_user = pwdtk_data
                 raise PwdtkPermissionDenied
             if user.check_password(password):
-                if pwdtk_data.failed_logins or pwdtk_data.fail_time or pwdtk_data.locked:
+                must_renew = pwdtk_data.compute_must_renew()
+                if (pwdtk_data.failed_logins or pwdtk_data.fail_time or
+                  pwdtk_data.locked or must_renew != pwdtk_data.must_renew):
                     pwdtk_data.failed_logins = 0
                     pwdtk_data.fail_time = None
                     pwdtk_data.locked = False
-                must_renew = pwdtk_data.compute_must_renew()
-                if must_renew != pwdtk_data.must_renew:
                     pwdtk_data.must_renew = must_renew
                     pwdtk_data.save()
                 return user
             else:
                 if PwdtkSettings.PWDTK_USER_FAILURE_LIMIT is None:
                     return None
-                if pwdtk_data.failed_logins >= PwdtkSettings.PWDTK_USER_FAILURE_LIMIT:
-                    pwdtk_data.locked = True
-                    pwdtk_data.fail_time = datetime.datetime.utcnow()
-                    pwdtk_data.save()
+                if pwdtk_data.failed_logins > PwdtkSettings.PWDTK_USER_FAILURE_LIMIT:
+                    pwdtk_data.set_locked()
                     request.pwdtk_fail = True
                     request.pwdtk_fail_reason = "lockout"
                     request.pwdtk_user = pwdtk_data

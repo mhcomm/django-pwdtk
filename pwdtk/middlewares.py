@@ -1,4 +1,3 @@
-import datetime
 import json
 import logging
 
@@ -10,6 +9,12 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
+
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except:
+    class MiddlewareMixin(object):
+        pass
 
 
 from pwdtk.views import lockout_response
@@ -33,11 +38,6 @@ class PwdtkMiddleware(MiddlewareMixin):
         else:
             super(PwdtkMiddleware, self).__init__()
 
-    def process_request(self, request):
-        logger.debug("PWDTK Proc Req %s %s", request.user, repr(request))
-        request.pwdtk_fail_user = None
-        request.pwdtk_fail_reason = None
-
 
     def process_request(self, request):
 
@@ -54,7 +54,9 @@ class PwdtkMiddleware(MiddlewareMixin):
           request.path not in PwdtkSettings.PWDTK_PASSWD_CHANGE_ALLOWED_PATHS):
             if request.path != reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW):
                 return redirect(reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW))
-
+        if getattr(request, "pwdtk_user", None):
+            logger.debug(request.pwdtk_user.failed_logins)
+        # pwdtk_data.failed_logins
         if getattr(request, "pwdtk_fail", None):
             fail_reason = request.pwdtk_fail_reason
             context = {
@@ -64,10 +66,6 @@ class PwdtkMiddleware(MiddlewareMixin):
             if fail_reason == "lockout":
                 context.update({
                     'msg': 'user locked out (too many bad passwords)',
-                    })
-            if fail_reason == "pwd_obsolete":
-                context.update({
-                    'msg': 'user must renew password',
                     })
             if request.is_ajax():
                 return HttpResponse(
@@ -83,10 +81,7 @@ class PwdtkMiddleware(MiddlewareMixin):
                         context["next"] = next
                     return redirect("%s?%s" % (reverse(PwdtkSettings.PWDTK_LOCKOUT_VIEW), urlencode(context)))
 
-                context.update(self.handle_lockout_context(request.pwdtk_user))
+                context.update(request.pwdtk_user.handle_lockout_context())
                 return lockout_response(request, context)
-
-            if fail_reason == "pwd_obsolete":
-                return redirect(reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW))
 
         return response
