@@ -2,6 +2,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def add_backend(backends):
     """ adds auth backend depending on django version
     """
@@ -9,10 +10,13 @@ def add_backend(backends):
     backends.insert(0, 'pwdtk.auth_backends.PwdtkBackend')
 
 
-def add_middlewares(middlewares, after='django.contrib.auth.middleware.AuthenticationMiddleware'):
+def add_middlewares(
+  middlewares,
+  after='django.contrib.auth.middleware.AuthenticationMiddleware'):
     """ adds middlewares depending on django.VERSION """
 
     middlewares.append('pwdtk.middlewares.PwdtkMiddleware')
+
 
 # PWDTK Common settings for login / logout views
 # ----------------------------------------------------------
@@ -20,7 +24,6 @@ def add_middlewares(middlewares, after='django.contrib.auth.middleware.Authentic
 # Allow to completely enable / disable pwdtk
 # This should disable all hooks / middlewares and auth backends
 PWDTK_ENABLED = True
-
 
 # Model to be used for storing PWDTK related info
 PWDTK_USER_PARAMS = 'pwdtk.auth_backends_data.UserData'
@@ -48,10 +51,6 @@ PWDTK_USERNAME_FORM_FIELD = 'username'
 
 # the field in the login form, that contains the password
 # PWDTK_PASSWORD_FORM_FIELD = 'username'
-
-
-
-
 
 PWDTK_IP_FAILURE_LIMIT = 0
 

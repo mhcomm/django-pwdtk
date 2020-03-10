@@ -1,7 +1,5 @@
-import importlib
 import logging
 
-import django
 from django.apps import AppConfig
 from django.contrib.auth import get_user_model
 
@@ -29,4 +27,3 @@ class PwdTkConfig(AppConfig):
         User = get_user_model()
         from pwdtk.watchers import watch_set_password
         User.set_password = watch_set_password(User.set_password)
-

@@ -2,8 +2,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import inspect
-import datetime
-import dateutil
 import six
 
 from django.conf import settings
@@ -41,7 +39,8 @@ class PwdtkSettingsType(type):
 
 
 if getattr(settings, 'PWDTK_CUSTOM_SETTINGS_CLS', None):
-    class PwdtkSettings(six.with_metaclass(_resolve_object_path(settings.PWDTK_CUSTOM_SETTINGS_CLS))):
+    class PwdtkSettings(six.with_metaclass(
+      _resolve_object_path(settings.PWDTK_CUSTOM_SETTINGS_CLS))):
         pass
 else:
     class PwdtkSettings(six.with_metaclass(PwdtkSettingsType)):

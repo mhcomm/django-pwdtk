@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
+
 def fill_pwd_data(apps, schema_editor):
 
     PwdData = apps.get_model("pwdtk", "pwddata")
@@ -24,5 +25,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(fill_pwd_data, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(
+            fill_pwd_data,
+            reverse_code=migrations.RunPython.noop),
     ]

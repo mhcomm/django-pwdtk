@@ -7,12 +7,11 @@ import django
 from django.core.exceptions import MiddlewareNotUsed
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 
 try:
     from django.utils.deprecation import MiddlewareMixin
-except:
+except: # noqa E722
     class MiddlewareMixin(object):
         pass
 
@@ -75,7 +74,11 @@ class PwdtkMiddleware(MiddlewareMixin):
                     )
 
             if PwdtkSettings.PWDTK_LOCKOUT_VIEW:
-                return redirect("%s?%s" % (reverse(PwdtkSettings.PWDTK_LOCKOUT_VIEW), urlencode(context)))
+                return redirect("%s?%s" % (
+                    reverse(PwdtkSettings.PWDTK_LOCKOUT_VIEW),
+                    urlencode(context)
+                    )
+                )
             return lockout_response(request, exception.pwdtk_data)
         return None
 

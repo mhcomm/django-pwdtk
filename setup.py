@@ -10,6 +10,7 @@ install_requires = [
     "future",
     "minibelt",
     "python-dateutil",
+    "pytz",
     ]
 
 

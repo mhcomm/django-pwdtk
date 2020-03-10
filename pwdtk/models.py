@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import datetime
 import jsonfield
 import pytz
 
@@ -12,6 +11,7 @@ from django.utils import timezone
 from pwdtk.helpers import PwdtkSettings
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+
 
 @python_2_unicode_compatible
 class PwdData(models.Model):
@@ -33,7 +33,6 @@ class PwdData(models.Model):
 
     def __str__(self):
         return("%r, %r" % (self.user.id, self.user.username))
-
 
     def set_locked(self, failed_logins=None):
         if failed_logins is not None:
@@ -60,7 +59,8 @@ class PwdData(models.Model):
         if timezone.is_aware(self.fail_time):
             return self.fail_time
         else:
-            return pytz.timezone(PwdtkSettings.TIME_ZONE).localize(self.fail_time)
+            return pytz.timezone(
+                PwdtkSettings.TIME_ZONE).localize(self.fail_time)
 
     @property
     def fail_age(self):
@@ -71,8 +71,8 @@ class PwdData(models.Model):
         """ determines whether a user must renew his password
         """
 
-        return (timezone.now() - self.last_change_time).total_seconds() > PwdtkSettings.PWDTK_PASSWD_AGE
-
+        return ((timezone.now() - self.last_change_time).total_seconds() >
+                PwdtkSettings.PWDTK_PASSWD_AGE)
 
     def get_lockout_context(self):
 

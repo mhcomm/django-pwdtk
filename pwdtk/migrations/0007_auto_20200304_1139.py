@@ -27,7 +27,15 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='pwddata',
             name='user',
-            field=models.OneToOneField(related_name='pwdtk_data', default=None, to=settings.AUTH_USER_MODEL),
+            field=models.OneToOneField(
+                related_name='pwdtk_data',
+                default=None,
+                to=settings.AUTH_USER_MODEL),
             preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='pwddata',
+            name='must_renew',
+            field=models.BooleanField(default=False),
         ),
     ]

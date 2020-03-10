@@ -32,6 +32,10 @@ urlpatterns = [
     url(r'^protected', protected,
         name='pwdtk_test_protected'),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^accounts/password_change/$', django.contrib.auth.views.password_change, name='password_change'),
-    url(r'^accounts/password_change/done/$', django.contrib.auth.views.password_change_done, name='password_change_done'),
+    url(r'^accounts/password_change/$',
+        django.contrib.auth.views.password_change,
+        name='password_change'),
+    url(r'^accounts/password_change/done/$',
+        django.contrib.auth.views.password_change_done,
+        name='password_change_done'),
 ]

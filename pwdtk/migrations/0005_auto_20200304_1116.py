@@ -43,6 +43,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='pwddata',
             name='user',
-            field=models.OneToOneField(related_name='pwdtk_data', null=True, to=settings.AUTH_USER_MODEL),
+            field=models.OneToOneField(
+                related_name='pwdtk_data',
+                null=True,
+                to=settings.AUTH_USER_MODEL),
         ),
     ]

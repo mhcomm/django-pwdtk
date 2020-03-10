@@ -4,7 +4,6 @@ from __future__ import print_function
 import datetime
 import logging
 
-import dateutil.parser
 import django
 import pytest
 
@@ -12,7 +11,6 @@ import pytest
 from builtins import range
 from django.contrib.auth import get_user_model
 from django.contrib import auth
-from django.http.response import HttpResponseRedirect
 from django.test import Client
 from django.utils import timezone
 
@@ -38,7 +36,6 @@ def do_login(client, data, use_good_password=True, shall_pass=None):
                             (failed login, passed login)
                             If set to None, then it is set to use_good_password
     """
-    username = data['username']
     password = data['password']
 
     if not use_good_password:
@@ -197,7 +194,10 @@ def test_pwd_expire(two_users):  # noqa: F811
     pwdtk_data = user.pwdtk_data
 
     # make passwd obsolete
-    pwdtk_data.last_change_time = timezone.now() - datetime.timedelta(seconds=PwdtkSettings.PWDTK_PASSWD_AGE)
+    pwdtk_data.last_change_time = (
+        timezone.now() -
+        datetime.timedelta(seconds=PwdtkSettings.PWDTK_PASSWD_AGE)
+    )
     pwdtk_data.save()
     assert pwdtk_data.compute_must_renew()
 
