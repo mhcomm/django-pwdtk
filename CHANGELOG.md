@@ -1,5 +1,8 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v0.2.9](https://github.com/mhcomm/django-pwdtk/compare/v0.2.8...v0.2.9)
+* fix bug w py36/dj1.11 + MIDDLEWARE_CLASSES
+* add CI for py36 with django 1.11 and old style MIDDLEWARE_CLASSES
 ## [v0.2.8](https://github.com/mhcomm/django-pwdtk/compare/v0.2.7...v0.2.8)
 * fix CI runners (limit max version for some packages)
 * allow to completely disable pwdtk
