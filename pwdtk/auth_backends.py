@@ -15,27 +15,27 @@ from pwdtk.models import PwdData
 
 logger = logging.getLogger(__name__)
 
-class PwdtkPermissionDenied(PermissionDenied):
+
+class PwdtkLockedException(Exception):
     """ custom exception """
 
+    def __init__(self, pwdtk_data):
+
+        self.pwdtk_data = pwdtk_data
 
 class PwdtkBackend(ModelBackend):
     """
     Authenticates against settings.AUTH_USER_MODEL.
     """
-    def authenticate(self, request, password, username=None, **kwargs):
+    def authenticate(self, username=None, password=None, **kwargs):
         UserModel = get_user_model()
         if username is None:
             username = kwargs.get(UserModel.USERNAME_FIELD)
         try:
             user = UserModel._default_manager.get_by_natural_key(username)
             pwdtk_data = PwdData.get_or_create_for_user(user)
-            request.pwdtk_user = pwdtk_data
             if pwdtk_data.is_locked():
-                request.pwdtk_fail = True
-                request.pwdtk_fail_reason = "lockout"
-                request.pwdtk_user = pwdtk_data
-                raise PwdtkPermissionDenied
+                raise PwdtkLockedException(pwdtk_data)
             if user.check_password(password):
                 must_renew = pwdtk_data.compute_must_renew()
                 if (pwdtk_data.failed_logins or pwdtk_data.fail_time or
@@ -49,12 +49,9 @@ class PwdtkBackend(ModelBackend):
             else:
                 if PwdtkSettings.PWDTK_USER_FAILURE_LIMIT is None:
                     return None
-                if pwdtk_data.failed_logins > PwdtkSettings.PWDTK_USER_FAILURE_LIMIT:
-                    pwdtk_data.set_locked()
-                    request.pwdtk_fail = True
-                    request.pwdtk_fail_reason = "lockout"
-                    request.pwdtk_user = pwdtk_data
-                    raise PwdtkPermissionDenied
+                if pwdtk_data.failed_logins+1 >= PwdtkSettings.PWDTK_USER_FAILURE_LIMIT:
+                    pwdtk_data.set_locked(pwdtk_data.failed_logins+1)
+                    raise PwdtkLockedException(pwdtk_data)
                 else:
                     pwdtk_data.failed_logins += 1
                     pwdtk_data.save()

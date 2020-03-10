@@ -12,7 +12,6 @@ import pytest
 from builtins import range
 from django.contrib.auth import get_user_model
 from django.http.response import HttpResponseRedirect
-from django.http import HttpRequest
 from django.test import Client
 from django.utils import timezone
 
@@ -25,43 +24,6 @@ logger = logging.getLogger(__name__)
 AUTH_URL = PwdtkSettings.PWDTK_TEST_ADMIN_URL
 User = get_user_model()
 
-
-def nada():
-    if not True:
-        logger.debug('status_code %s %s', type(status_code), repr(status_code))
-        if status_code == 302:
-            logger.debug("RESP TYPE %s", type(resp))
-            logger.debug("status %s", resp.status_code)
-            logger.debug("keys %s", sorted(vars(resp).keys()))
-            for key, val in sorted(vars(resp).items()):
-                logger.debug("%s: %s", key, repr(val))
-
-            if resp.context:
-                logger.debug("CONTEXT")
-                for key, val in sorted(vars(resp.context).items()):
-                    logger.debug("%s: %s", key, repr(val))
-            else:
-                logger.debug("NO CONTEXT")
-
-        if status_code == 302:  # should not pass
-            logger.debug("T_ADM_URL = %s", PwdtkSettings.PWDTK_TEST_ADMIN_URL)
-            logger.debug("location = %s", location)
-
-            assert not location.endswith(PwdtkSettings.PWDTK_TEST_ADMIN_URL)
-        elif status_code == 200:
-            answer = resp.content
-            assert PwdtkSettings.PWDTK_TEST_LOGIN_FAIL_SUBMSG in answer
-        else:
-            answer = resp.content
-            assert PwdtkSettings.PWDTK_TEST_LOCKOUT_SUBMSG in answer
-    else:
-        assert isinstance(resp, HttpResponseRedirect)
-        assert status_code == 302
-        assert resp.has_header('location')
-        location = resp['location']
-        assert location.endswith(PwdtkSettings.PWDTK_TEST_ADMIN_URL)
-        logger.debug("login of %r/%r ok as expected",
-                     username, password)
 
 def do_login(client, data, use_good_password=True, shall_pass=None):
     """ helper to simulate logins via the admin login form.
@@ -116,16 +78,14 @@ def test_login_no_form(two_users):  # noqa: F811
     user = two_users[0]
     username = user.username
     password = user.raw_password
-    request = HttpRequest()
     # First successful login without form
-    loggedin = client.login(username=username, password=password, request=request)
+    loggedin = client.login(username=username, password=password)
     print("%s %s -> %s" % (username, password, loggedin))
     assert loggedin is True
 
     # login with bad password fails without form
-    request = HttpRequest()
     bad_pwd = password + 'a'
-    loggedin = client.login(username=username, password=bad_pwd, request=request)
+    loggedin = client.login(username=username, password=bad_pwd)
     print("%s %s -> %s" % (username, bad_pwd, loggedin))
     assert loggedin is False
 

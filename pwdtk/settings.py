@@ -1,5 +1,18 @@
-import django
+import logging
 
+logger = logging.getLogger(__name__)
+
+def add_backend(backends):
+    """ adds auth backend depending on django version
+    """
+
+    backends.insert(0, 'pwdtk.auth_backends.PwdtkBackend')
+
+
+def add_middlewares(middlewares, after='django.contrib.auth.middleware.AuthenticationMiddleware'):
+    """ adds middlewares depending on django.VERSION """
+
+    middlewares.append('pwdtk.middlewares.PwdtkMiddleware')
 
 # PWDTK Common settings for login / logout views
 # ----------------------------------------------------------

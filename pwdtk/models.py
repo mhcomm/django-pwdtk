@@ -35,8 +35,9 @@ class PwdData(models.Model):
         return("%r, %r" % (self.user.id, self.user.username))
 
 
-    def set_locked(self):
-
+    def set_locked(self, failed_logins=None):
+        if failed_logins is not None:
+            self.failed_logins = failed_logins
         self.locked = True
         self.fail_time = timezone.now()
         self.save()
@@ -55,6 +56,13 @@ class PwdData(models.Model):
         return False
 
     @property
+    def aware_fail_time(self):
+        if timezone.is_aware(self.fail_time):
+            return self.fail_time
+        else:
+            return pytz.timezone(PwdtkSettings.TIME_ZONE).localize(self.fail_time)
+
+    @property
     def fail_age(self):
 
         return int((timezone.now() - self.fail_time).total_seconds())
@@ -65,28 +73,12 @@ class PwdData(models.Model):
 
         return (timezone.now() - self.last_change_time).total_seconds() > PwdtkSettings.PWDTK_PASSWD_AGE
 
-    def handle_lockout_context(self):
-
-        age = self.fail_age
-        to_wait = PwdtkSettings.PWDTK_LOCKOUT_TIME - age
-        to_wait_minutes, to_wait_seconds = divmod(to_wait, 60)
-        to_wait_str = "%i minutes and %i seconds" % (to_wait_minutes, to_wait_seconds)
-
-        return {
-            'to_wait': to_wait_str,
-            'to_wait_time_tuple': (to_wait_minutes, to_wait_seconds),
-            'failure_limit': self.failed_logins,
-
-        }
 
     def get_lockout_context(self):
-        if timezone.is_aware(self.fail_time):
-            fail_time = self.fail_time.isoformat()
-        else:
-            fail_time = pytz.timezone(PwdtkSettings.TIME_ZONE).localize(self.fail_time).isoformat()
+
         return {
             "username": self.user.username,
             "lockout_time": PwdtkSettings.PWDTK_LOCKOUT_TIME,
             "failed_logins": self.failed_logins,
-            "fail_time": fail_time,
+            "fail_time": self.aware_fail_time.isoformat(),
         }
