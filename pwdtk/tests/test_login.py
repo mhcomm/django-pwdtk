@@ -11,6 +11,7 @@ import pytest
 
 from builtins import range
 from django.contrib.auth import get_user_model
+from django.contrib import auth
 from django.http.response import HttpResponseRedirect
 from django.test import Client
 from django.utils import timezone
@@ -50,11 +51,15 @@ def do_login(client, data, use_good_password=True, shall_pass=None):
     logger.debug("loginurl = %s", url)
     resp = client.post(url, data=data)
 
-
-    if shall_pass:
-        assert '_auth_user_id' in client.session
+    user = auth.get_user(client)
+    if django.VERSION < (1, 10):
+        is_authenticated = user.is_authenticated()
     else:
-        assert '_auth_user_id' not in client.session
+        is_authenticated = user.is_authenticated
+    if shall_pass:
+        assert is_authenticated
+    else:
+        assert not is_authenticated
         data['password'] = password  # restore password
 
     return resp
