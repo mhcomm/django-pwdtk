@@ -70,7 +70,8 @@ class PwdData(models.Model):
     def compute_must_renew(self):
         """ determines whether a user must renew his password
         """
-
+        if getattr(self.user, "disable_must_renew", False):
+            return False
         return ((timezone.now() - self.last_change_time).total_seconds() >
                 PwdtkSettings.PWDTK_PASSWD_AGE)
 
