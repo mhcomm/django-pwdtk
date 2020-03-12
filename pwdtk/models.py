@@ -29,6 +29,7 @@ class PwdData(models.Model):
     def get_or_create_for_user(cls, user):
         if not hasattr(user, 'pwdtk_data'):
             user.pwdtk_data = cls.objects.create(user=user)
+
         return user.pwdtk_data
 
     def __str__(self):

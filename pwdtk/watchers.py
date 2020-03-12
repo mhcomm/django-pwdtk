@@ -1,11 +1,13 @@
-import datetime
 import logging
 import os
 
 from functools import wraps
 
+from django.utils import timezone
+
 from pwdtk.helpers import recursion_depth
 from pwdtk.helpers import PwdtkSettings
+from pwdtk.signals import pwd_data_post_change_password
 
 
 logger = logging.getLogger(__name__)
@@ -55,7 +57,7 @@ def watch_set_password(orig_set_password):
             logger.debug("password change detected")
             orig_set_password(self, password)
             if hasattr(self, 'pwdtk_data'):
-                now = datetime.datetime.utcnow()
+                now = timezone.now()
                 self.pwdtk_data.password_history.insert(
                     0, (now, self.password))
                 self.pwdtk_data.password_history[
@@ -63,6 +65,9 @@ def watch_set_password(orig_set_password):
                 self.pwdtk_data.last_change_time = now
                 self.pwdtk_data.must_renew = False
                 self.pwdtk_data.save()
+                pwd_data_post_change_password.send(
+                    sender=self.pwdtk_data.__class__,
+                    pwd_data=self.pwdtk_data)
         return orig_set_password(self, password)
 
     decorated._decorated_by_pwdtk = True
