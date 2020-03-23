@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
+import importlib
 import inspect
 import six
 
@@ -22,12 +23,12 @@ def recursion_depth():
 
 
 def _resolve_object_path(dotted_name):
+
     if isinstance(dotted_name, six.string_types):
-        path = dotted_name.split('.')
-        module = __import__(dotted_name.rsplit('.', 1)[0])
-        for item in path[1:-1]:
-            module = getattr(module, item)
-        return getattr(module, path[-1])
+
+        module_name, obj_name = dotted_name.rsplit(".", 1)
+        module = importlib.import_module(module_name)
+        return getattr(module, obj_name)
 
     return dotted_name
 
