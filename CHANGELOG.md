@@ -1,5 +1,8 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v0.3.0](https://github.com/mhcomm/django-pwdtk/compare/v0.2.9...v0.3.0)
+* allow to fetch settings not only from django settings if needed
+* ?????
 ## [v0.2.9](https://github.com/mhcomm/django-pwdtk/compare/v0.2.8...v0.2.9)
 * fix bug w py36/dj1.11 + MIDDLEWARE_CLASSES
 * add CI for py36 with django 1.11 and old style MIDDLEWARE_CLASSES
