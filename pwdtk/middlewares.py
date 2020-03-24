@@ -1,23 +1,35 @@
 import json
 import logging
 
-from django.conf import settings
+from six.moves.urllib.parse import urlencode
+
+import django
 from django.core.exceptions import MiddlewareNotUsed
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.utils.deprecation import MiddlewareMixin
 
-from pwdtk.auth_backends import lockout_response
-from pwdtk.auth_backends import MHPwdPolicyBackend
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except: # noqa E722
+    class MiddlewareMixin(object):
+        pass
+
+
+from pwdtk.auth_backends import PwdtkLockedException
+from pwdtk.helpers import PwdtkSettings
+from pwdtk.models import PwdData
+from pwdtk.views import lockout_response
 
 
 logger = logging.getLogger(__name__)
-PWDTK_PASSWD_CHANGE_VIEW = settings.PWDTK_PASSWD_CHANGE_VIEW
 
 
 class PwdtkMiddleware(MiddlewareMixin):
+
     def __init__(self, get_response=None):
-        if not settings.PWDTK_ENABLED:
+
+        if not PwdtkSettings.PWDTK_ENABLED:
             logger.debug("PWDTK middleware is disabled")
             raise MiddlewareNotUsed("pwdtk is disabled")
         if get_response:
@@ -26,39 +38,58 @@ class PwdtkMiddleware(MiddlewareMixin):
         else:
             super(PwdtkMiddleware, self).__init__()
 
-    def process_request(self, request):
-        logger.debug("PWDTK Proc Req %s %s", request.user, repr(request))
-        request.pwdtk_fail_user = None
-        request.pwdtk_fail_reason = None
+    def must_renew_password(self, request):
 
-    def process_response(self, request, response):
-        logger.debug(
-            "PWDTK Proc resp %s %s %s",
-            request.user, repr(request), repr(response))
-        if request.pwdtk_fail_user:
-            fail_reason = request.pwdtk_fail_reason
-            context = {
-                'username': request.pwdtk_fail_user,
-                'fail_reason': fail_reason
-                }
-            if fail_reason == "lockout":
-                context.update({
-                    'msg': 'user locked out (too many bad passwords)',
-                    })
-            if fail_reason == "pwd_obsolete":
-                context.update({
-                    'msg': 'user must renew password',
-                    })
+        if request.method == 'GET':
+            return False
+
+        if django.VERSION < (1, 10):
+            is_authenticated = request.user and request.user.is_authenticated()
+        else:
+            is_authenticated = request.user and request.user.is_authenticated
+
+        if not is_authenticated:
+            return False
+
+        if not PwdData.get_or_create_for_user(request.user).must_renew:
+            return False
+
+        if request.path == reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW):
+            return False
+
+        if request.path in PwdtkSettings.PWDTK_PASSWD_CHANGE_ALLOWED_PATHS:
+            return False
+
+        return True
+
+    def process_exception(self, request, exception):
+
+        if isinstance(exception, PwdtkLockedException):
+            context = exception.pwdtk_data.get_lockout_context()
             if request.is_ajax():
                 return HttpResponse(
                     json.dumps(context),
                     content_type='application/json',
                     status=403,
                     )
-            logger.debug("SHOULD REDIRECT for %s", request.pwdtk_fail_user)
-            if fail_reason == "lockout":
-                backend = MHPwdPolicyBackend.get_backend()
-                return lockout_response(request, backend)
-            if fail_reason == "pwd_obsolete":
-                return redirect(PWDTK_PASSWD_CHANGE_VIEW)
+
+            if PwdtkSettings.PWDTK_LOCKOUT_VIEW:
+                return redirect("%s?%s" % (
+                    reverse(PwdtkSettings.PWDTK_LOCKOUT_VIEW),
+                    urlencode(context)
+                    )
+                )
+            return lockout_response(request, exception.pwdtk_data)
+        return None
+
+    def process_request(self, request):
+
+        if self.must_renew_password(request):
+            return redirect(reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW))
+
+    def process_response(self, request, response):
+
+        if self.must_renew_password(request):
+            return redirect(reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW))
+
         return response

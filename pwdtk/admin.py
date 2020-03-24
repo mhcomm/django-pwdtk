@@ -8,5 +8,12 @@ from pwdtk.models import PwdData
 
 @admin.register(PwdData)
 class PwdDataAdmin(admin.ModelAdmin):
-    list_display = ('id', 'username', 'lockout_info', 'must_renew', 'data')
-    search_fields = ('id', 'username')
+    list_display = (
+        'id',
+        'user',
+        'locked',
+        'failed_logins',
+        'fail_time',
+        'last_change_time',
+        'must_renew',)
+    search_fields = ('id', 'user')

@@ -22,7 +22,6 @@ from django.contrib import admin
 from pwdtk.testviews import home
 from pwdtk.testviews import logout_view
 from pwdtk.testviews import protected
-from pwdtk.views import password_change
 
 urlpatterns = [
     url(r'^$', home, name='pwdtk_test_home'),
@@ -35,7 +34,10 @@ urlpatterns = [
     url(r'^protected', protected,
         name='pwdtk_test_protected'),
     url(r'^admin/', admin.site.urls),
-    url(r'^ch_passwd/', password_change, name='password_change'),
-    url('^pwd_change_done$', home,
+    url(r'^accounts/password_change/$',
+        django.contrib.auth.views.password_change,
+        name='password_change'),
+    url(r'^accounts/password_change/done/$',
+        django.contrib.auth.views.password_change_done,
         name='password_change_done'),
 ]

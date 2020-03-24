@@ -33,7 +33,7 @@ ALLOWED_HOSTS = []
 LOGIN_URL = "/login"
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    'pwdtk.auth_backends.PwdtkBackend',
     ]
 
 # Application definition
@@ -64,14 +64,13 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'pwdtk.middlewares.PwdtkMiddleware',
 ]
 
 ROOT_URLCONF = 'pwdtk.testproject.dj18.urls'
 
 # PWDTK specifics
 import pwdtk.settings  # noqa E402
-pwdtk.settings.add_backend(AUTHENTICATION_BACKENDS)
-pwdtk.settings.add_middlewares(MIDDLEWARE_CLASSES)
 from pwdtk.settings import *  # noqa F401
 
 PWDTK_PASSWD_CHANGE_TEMPLATE = None

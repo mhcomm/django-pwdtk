@@ -1,25 +1,21 @@
-import django
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def add_backend(backends):
     """ adds auth backend depending on django version
     """
-    if django.VERSION >= (1, 11):
-        backends.insert(
-            0, 'pwdtk.auth_backends.MHPwdPolicyBackend')
+
+    backends.insert(0, 'pwdtk.auth_backends.PwdtkBackend')
 
 
 def add_middlewares(
-        middlewares,
-        after='django.contrib.auth.middleware.AuthenticationMiddleware'):
+  middlewares,
+  after='django.contrib.auth.middleware.AuthenticationMiddleware'):
     """ adds middlewares depending on django.VERSION """
-    assert type(middlewares) is list
-    idx = middlewares.index(after) + 1
-    to_insert = []
-    if django.VERSION >= (1, 11):
-        to_insert.append('pwdtk.middlewares.PwdtkMiddleware')
 
-    middlewares[idx:idx] = to_insert
+    middlewares.append('pwdtk.middlewares.PwdtkMiddleware')
 
 
 # PWDTK Common settings for login / logout views
@@ -28,7 +24,6 @@ def add_middlewares(
 # Allow to completely enable / disable pwdtk
 # This should disable all hooks / middlewares and auth backends
 PWDTK_ENABLED = True
-
 
 # Model to be used for storing PWDTK related info
 PWDTK_USER_PARAMS = 'pwdtk.auth_backends_data.UserData'
@@ -57,9 +52,6 @@ PWDTK_USERNAME_FORM_FIELD = 'username'
 # the field in the login form, that contains the password
 # PWDTK_PASSWORD_FORM_FIELD = 'username'
 
-# Name of the template to be used when a user is locked out
-PWDTK_LOCKOUT_TEMPLATE = 'login/locked_out_simple.html'
-
 PWDTK_IP_FAILURE_LIMIT = 0
 
 
@@ -77,8 +69,13 @@ PWDTK_PASSWD_HISTORY_LEN = 3
 
 # template to display for password renewal
 PWDTK_PASSWD_CHANGE_VIEW = "password_change"
-PWDTK_PASSWD_CHANGE_TEMPLATE = "login/passwd_change_simple.html"
 
+
+PWDTK_PASSWD_CHANGE_ALLOWED_PATHS = []
+
+# Name of the template to be used when a user is locked out
+PWDTK_LOCKOUT_VIEW = None
+PWDTK_LOCKOUT_TEMPLATE = 'login/locked_out_simple.html'
 
 # for PWDTK unit testing.
 # --------------------------
