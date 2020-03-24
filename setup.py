@@ -31,7 +31,7 @@ setup(
         "Development Status :: 3 - Alpha",
         ],
     keywords="django authentification password",
-    url="https://www.teledomic.eu",
+    url="https://github.com/mhcomm/django-pwdtk",
     author="MHComm",
     author_email="info@mhcomm.fr",
     license="MIT",
