@@ -133,7 +133,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'cstatic18')
 
 TEST_RUNNER = 'pwdtk.testproject.pytest_runner.PytestTestRunner'
 
-from pwdtk.testproject.logcfg import LOGGING  # noqa: F401
+from pwdtk.testproject.logcfg import LOGGING  # noqa: F401, E402
 
 # Just for debugging
 # PASSWORD_HASHERS = [
