@@ -1,5 +1,7 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v0.3.1](https://github.com/mhcomm/django-pwdtk/compare/v0.3.0...v0.3.1)
+* fix for migrations
 ## [v0.3.0](https://github.com/mhcomm/django-pwdtk/compare/v0.2.9...v0.3.0)
 * allow to fetch settings not only from django settings if needed (PWDTK_CUSTOM_SETTINGS_CLS)
 * add PWDTK_LOCKOUT_VIEW for lockout redirection
