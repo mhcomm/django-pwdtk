@@ -7,7 +7,8 @@ from django.db import migrations
 def fill_pwd_data(apps, schema_editor):
 
     PwdData = apps.get_model("pwdtk", "pwddata")
-    PwdData.objects.all(old_user=None).delete()
+    PwdData.objects.filter(old_user_id=None).delete()
+    PwdData.objects.filter(old_user_id="").delete()
     for pwd_data in PwdData.objects.all():
         pwd_data.user_id = pwd_data.old_user_id
         pwd_data.locked = pwd_data.data.get("locked", False)
