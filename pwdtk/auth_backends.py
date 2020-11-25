@@ -26,7 +26,7 @@ class PwdtkBackend(ModelBackend):
     """
     Authenticates against settings.AUTH_USER_MODEL.
     """
-    def authenticate(self, username=None, password=None, **kwargs):
+    def authenticate(self, request, username=None, password=None, **kwargs):
         UserModel = get_user_model()
         if username is None:
             username = kwargs.get(UserModel.USERNAME_FIELD)
