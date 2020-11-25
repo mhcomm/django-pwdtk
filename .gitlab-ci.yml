@@ -89,21 +89,6 @@ flake3:
 # ############################################################################
 # Test stage
 # ############################################################################
-test_18:
-  tags:
-    - shell
-  stage: test
-  allow_failure: false
-  retry:
-      max: 2
-      when:
-        - runner_system_failure
-  script:
-    - ". eenv/bin/activate"
-    - python -V
-    - pip install -U tox
-    - tox -e py27-django18,py35-django18,py36-django18
-
 test_1:
   tags:
     - shell
