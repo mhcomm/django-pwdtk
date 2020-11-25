@@ -17,7 +17,9 @@ AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 class PwdData(models.Model):
     """ a model in case no custom way is specified for storing related data
     """
-    user = models.OneToOneField(AUTH_USER_MODEL, related_name='pwdtk_data', on_delete=models.CASCADE)
+    user = models.OneToOneField(AUTH_USER_MODEL,
+                                related_name='pwdtk_data',
+                                on_delete=models.CASCADE)
     locked = models.BooleanField(default=False)
     failed_logins = models.PositiveIntegerField(default=0)
     fail_time = models.DateTimeField(null=True)

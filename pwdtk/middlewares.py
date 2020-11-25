@@ -5,9 +5,9 @@ from six.moves.urllib.parse import urlencode
 
 import django
 from django.core.exceptions import MiddlewareNotUsed
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.urls import reverse
 
 try:
     from django.utils.deprecation import MiddlewareMixin
