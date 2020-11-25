@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                 related_name='pwdtk_data',
                 null=True,
                 to=settings.AUTH_USER_MODEL,
-                on_delete=models.CASCADE
-                ),
+                on_delete=models.CASCADE,
+            ),
         ),
     ]

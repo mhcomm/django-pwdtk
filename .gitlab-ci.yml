@@ -102,7 +102,7 @@ test_1:
     - ". eenv/bin/activate"
     - python -V
     - pip install -U tox
-    - tox -e py27-django1,py35-django1,py36-django1_11_mwc,
+    - tox -e py27-django1,py35-django1,
 
 test_21:
   tags:
