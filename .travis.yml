@@ -4,26 +4,17 @@ matrix:
  - python: 2.7
    env: DJANGO_VER_OR_TAG=lint
  - python: 2.7
-   env: DJANGO_VER_OR_TAG=django18
- - python: 2.7
    env: DJANGO_VER_OR_TAG=django1
  - python: 3.5
-   env: DJANGO_VER_OR_TAG=django18
- - python: 3.5
    env: DJANGO_VER_OR_TAG=django1
-# - python: 3.5
-#   env: DJANGO_VER_OR_TAG=django21
+ - python: 3.5
+   env: DJANGO_VER_OR_TAG=django21
  - python: 3.6
    env: DJANGO_VER_OR_TAG=lint
  - python: 3.6
-   env: DJANGO_VER_OR_TAG=django18
- - python: 3.6
    env: DJANGO_VER_OR_TAG=django1
-# django 1_11 with old MIDDLEWARE_CLASSES
  - python: 3.6
-   env: DJANGO_VER_OR_TAG=django1_11_mwc
-# - python: 3.6
-#   env: DJANGO_VER_OR_TAG=django21
+   env: DJANGO_VER_OR_TAG=django21
 
 install:
   - pip install tox

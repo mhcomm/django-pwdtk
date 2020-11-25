@@ -46,6 +46,8 @@ class Migration(migrations.Migration):
             field=models.OneToOneField(
                 related_name='pwdtk_data',
                 null=True,
-                to=settings.AUTH_USER_MODEL),
+                to=settings.AUTH_USER_MODEL,
+                on_delete=models.CASCADE,
+            ),
         ),
     ]
