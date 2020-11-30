@@ -1,5 +1,8 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v0.4.0](https://github.com/mhcomm/django-pwdtk/compare/v0.3.1...v0.4.0)
+* break django 1.8 compatibility
+* add support for django 2.2
 ## [v0.3.1](https://github.com/mhcomm/django-pwdtk/compare/v0.3.0...v0.3.1)
 * fix for migrations
 ## [v0.3.0](https://github.com/mhcomm/django-pwdtk/compare/v0.2.9...v0.3.0)
