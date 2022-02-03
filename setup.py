@@ -6,7 +6,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 install_requires = [
-    "django-jsonfield",
+    "django-jsonfield-backport",
     "future",
     "minibelt",
     "python-dateutil",

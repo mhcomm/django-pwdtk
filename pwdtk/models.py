@@ -1,12 +1,13 @@
 from __future__ import absolute_import
 
-import jsonfield
 import pytz
 
 from django.conf import settings
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils import timezone
+
+from django_jsonfield_backport.models import JSONField
 
 from pwdtk.helpers import PwdtkSettings
 
@@ -25,7 +26,7 @@ class PwdData(models.Model):
     fail_time = models.DateTimeField(null=True)
     must_renew = models.BooleanField(default=False)
     last_change_time = models.DateTimeField(default=timezone.now)
-    password_history = jsonfield.JSONField(default=[])
+    password_history = JSONField(default=[])
 
     @classmethod
     def get_or_create_for_user(cls, user):
