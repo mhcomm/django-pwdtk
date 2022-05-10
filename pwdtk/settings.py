@@ -54,6 +54,9 @@ PWDTK_USERNAME_FORM_FIELD = 'username'
 
 PWDTK_IP_FAILURE_LIMIT = 0
 
+PWDTK_PASSWORD_VALIDATOR = 'pwdtk.password_validation.PwdTkValidator'
+
+PWDTK_PASSWORD_VALIDATOR_OPTIONS = {}
 
 # PWDTK force password renewal
 # ------------------------------
