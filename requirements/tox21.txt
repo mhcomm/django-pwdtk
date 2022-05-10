@@ -1,6 +1,6 @@
 -r tox.txt
 django<2.2,>2.1
-django-extensions<3.1.5
+django-extensions<3.1.4
 django-jsonfield
 jsonfield<3.0
 

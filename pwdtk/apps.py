@@ -24,9 +24,6 @@ class PwdTkConfig(AppConfig):
             logger.debug("PWDTK DISABLED")
             return
 
-        if not hasattr(settings, "AUTH_PASSWORD_VALIDATORS"):
-            settings.AUTH_PASSWORD_VALIDATORS = []
-
         for password_validator in settings.AUTH_PASSWORD_VALIDATORS:
             if password_validator["NAME"] == PwdtkSettings.PWDTK_PASSWORD_VALIDATOR:
                 break
