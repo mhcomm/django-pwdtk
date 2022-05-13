@@ -24,8 +24,11 @@ class PwdTkValidator(object):
         if user and hasattr(user, 'pwdtk_data'):
             now = timezone.now()
             user.pwdtk_data.password_history.insert(0, (now, user.password))
-            user.pwdtk_data.password_history[PwdtkSettings.PWDTK_PASSWD_HISTORY_LEN:] = []
+            user.pwdtk_data.password_history[
+                PwdtkSettings.PWDTK_PASSWD_HISTORY_LEN:] = []
             user.pwdtk_data.last_change_time = now
             user.pwdtk_data.must_renew = False
             user.pwdtk_data.save()
-            pwd_data_post_change_password.send(sender=user.pwdtk_data.__class__, pwd_data=user.pwdtk_data)
+            pwd_data_post_change_password.send(
+                sender=user.pwdtk_data.__class__,
+                pwd_data=user.pwdtk_data)
