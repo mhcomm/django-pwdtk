@@ -25,11 +25,20 @@ class PwdTkConfig(AppConfig):
             logger.debug("PWDTK DISABLED")
             return
 
+        validator_name = getattr(
+            PwdtkSettings,
+            "PWDTK_PASSWORD_VALIDATOR",
+            pwdtk_settings.PWDTK_PASSWORD_VALIDATOR)
+        validator_options = getattr(
+            PwdtkSettings,
+            "PWDTK_PASSWORD_VALIDATOR_OPTIONS",
+            pwdtk_settings.PWDTK_PASSWORD_VALIDATOR_OPTIONS)
+
         for password_validator in settings.AUTH_PASSWORD_VALIDATORS:
-            if password_validator["NAME"] == getattr(PwdtkSettings, "PWDTK_PASSWORD_VALIDATOR", pwdtk_settings.PWDTK_PASSWORD_VALIDATOR):
+            if password_validator["NAME"] == validator_name:
                 break
         else:
             settings.AUTH_PASSWORD_VALIDATORS.append({
-                "NAME": getattr(PwdtkSettings, "PWDTK_PASSWORD_VALIDATOR", pwdtk_settings.PWDTK_PASSWORD_VALIDATOR),
-                "OPTIONS": getattr(PwdtkSettings, "PWDTK_PASSWORD_VALIDATOR_OPTIONS", pwdtk_settings.PWDTK_PASSWORD_VALIDATOR_OPTIONS)
+                "NAME": validator_name,
+                "OPTIONS": validator_options
             })
