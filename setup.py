@@ -49,9 +49,5 @@ setup(
       "Tracker": "https://github.com/mhcomm/django-pwdtk/issues",
     },
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4",
-    setup_requires=["pytest-runner"],
-    tests_require=[
-        "pytest",
-        ],
     include_package_data=True,
     )
