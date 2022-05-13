@@ -4,6 +4,7 @@ from django.apps import AppConfig
 from django.conf import settings
 
 from pwdtk.helpers import PwdtkSettings
+from pwdtk import settings as pwdtk_settings
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +26,10 @@ class PwdTkConfig(AppConfig):
             return
 
         for password_validator in settings.AUTH_PASSWORD_VALIDATORS:
-            if password_validator["NAME"] == PwdtkSettings.PWDTK_PASSWORD_VALIDATOR:
+            if password_validator["NAME"] == getattr(PwdtkSettings, "PWDTK_PASSWORD_VALIDATOR", pwdtk_settings.PWDTK_PASSWORD_VALIDATOR):
                 break
         else:
             settings.AUTH_PASSWORD_VALIDATORS.append({
-                "NAME": PwdtkSettings.PWDTK_PASSWORD_VALIDATOR,
-                "OPTIONS": PwdtkSettings.PWDTK_PASSWORD_VALIDATOR_OPTIONS,
+                "NAME": getattr(PwdtkSettings, "PWDTK_PASSWORD_VALIDATOR", pwdtk_settings.PWDTK_PASSWORD_VALIDATOR),
+                "OPTIONS": getattr(PwdtkSettings, "PWDTK_PASSWORD_VALIDATOR_OPTIONS", pwdtk_settings.PWDTK_PASSWORD_VALIDATOR_OPTIONS)
             })
