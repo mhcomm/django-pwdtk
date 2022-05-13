@@ -17,7 +17,7 @@ matrix:
    env: DJANGO_VER_OR_TAG=django21
 
 install:
-  - pip install tox
+  - pip install tox==3.20.1
 script:
   - tox -e $(echo py${TRAVIS_PYTHON_VERSION}-${DJANGO_VER_OR_TAG} | tr -d .)
 notifications:
