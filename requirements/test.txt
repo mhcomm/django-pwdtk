@@ -1,3 +1,2 @@
-django-extensions
 pytest
 pytest-django
