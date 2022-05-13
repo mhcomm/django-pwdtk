@@ -1,14 +1,6 @@
 language: python
 matrix:
  include:
- - python: 2.7
-   env: DJANGO_VER_OR_TAG=lint
- - python: 2.7
-   env: DJANGO_VER_OR_TAG=django1
- - python: 3.5
-   env: DJANGO_VER_OR_TAG=django1
- - python: 3.5
-   env: DJANGO_VER_OR_TAG=django21
  - python: 3.6
    env: DJANGO_VER_OR_TAG=lint
  - python: 3.6
@@ -17,7 +9,8 @@ matrix:
    env: DJANGO_VER_OR_TAG=django21
 
 install:
-  - pip install tox==3.20.1
+  - pip install -U pip
+  - pip install tox
 script:
   - tox -e $(echo py${TRAVIS_PYTHON_VERSION}-${DJANGO_VER_OR_TAG} | tr -d .)
 notifications:
