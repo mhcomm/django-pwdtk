@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import logging
 
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from pwdtk.helpers import PwdtkSettings
@@ -14,6 +15,9 @@ logger = logging.getLogger(__name__)
 class PwdTkValidator(object):
 
     def validate(self, password, user=None):
+
+        if user and not user.check_password(password):
+            ValidationError("")
         return None
 
     def get_help_text(self):
@@ -26,6 +30,7 @@ class PwdTkValidator(object):
             hasattr(user, 'pwdtk_data') and
             not user.check_password(password)
         ):
+
             now = timezone.now()
             user.pwdtk_data.password_history.insert(0, (now, user.password))
             user.pwdtk_data.password_history[

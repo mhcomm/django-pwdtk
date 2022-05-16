@@ -9,9 +9,10 @@ import pytest
 
 
 from builtins import range
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, password_validation
 from django.contrib import auth
-from django.test import Client
+from django.core.exceptions import ValidationError
+from django.test import Client, TestCase
 from django.utils import timezone
 
 from pwdtk.tests.fixtures import two_users  # noqa: F401
@@ -71,146 +72,149 @@ def do_logout(client):
     logger.debug("logout successful")
 
 
-@pytest.mark.django_db
-def test_login_no_form(two_users):  # noqa: F811
-    """ client login without the login url """
-    browser = "Mozilla/5.0"
-    client = Client(browser=browser)
+class UserLoginTests(TestCase):
 
-    user = two_users[0]
-    username = user.username
-    password = user.raw_password
-    # First successful login without form
-    loggedin = client.login(username=username, password=password)
-    print("%s %s -> %s" % (username, password, loggedin))
-    assert loggedin is True
+    @pytest.mark.django_db
+    def test_login_no_form(self, two_users):  # noqa: F811
+        """ client login without the login url """
+        browser = "Mozilla/5.0"
+        client = Client(browser=browser)
 
-    # login with bad password fails without form
-    bad_pwd = password + 'a'
-    loggedin = client.login(username=username, password=bad_pwd)
-    print("%s %s -> %s" % (username, bad_pwd, loggedin))
-    assert loggedin is False
+        user = two_users[0]
+        username = user.username
+        password = user.raw_password
+        # First successful login without form
+        loggedin = client.login(username=username, password=password)
+        print("%s %s -> %s" % (username, password, loggedin))
+        assert loggedin is True
 
+        # login with bad password fails without form
+        bad_pwd = password + 'a'
+        loggedin = client.login(username=username, password=bad_pwd)
+        print("%s %s -> %s" % (username, bad_pwd, loggedin))
+        assert loggedin is False
 
-@pytest.mark.django_db
-def test_login(two_users):  # noqa: F811
-    """ login via the login url """
-    browser = "Mozilla/5.0"
-    client = Client(browser=browser)
+    @pytest.mark.django_db
+    def test_login(self, two_users):  # noqa: F811
+        """ login via the login url """
+        browser = "Mozilla/5.0"
+        client = Client(browser=browser)
 
-    user = two_users[0]
-    username = user.username
-    password = user.raw_password
+        user = two_users[0]
+        username = user.username
+        password = user.raw_password
 
-    # go to a login page and fetch csrf token
-    url = AUTH_URL + "login/?next=" + AUTH_URL
-    logger.debug("loginurl = %s", url)
-    resp = client.get(url)
-    assert hasattr(resp, 'cookies')
-    csrf_token = resp.cookies.get('csrf_token')
-    logger.debug("token %r", csrf_token)
+        # go to a login page and fetch csrf token
+        url = AUTH_URL + "login/?next=" + AUTH_URL
+        logger.debug("loginurl = %s", url)
+        resp = client.get(url)
+        assert hasattr(resp, 'cookies')
+        csrf_token = resp.cookies.get('csrf_token')
+        logger.debug("token %r", csrf_token)
 
-    # prepare post_data
-    data = dict(
-        username=username,
-        password=password,
-        csrfmiddlewaretoken=csrf_token,
-        )
+        # prepare post_data
+        data = dict(
+            username=username,
+            password=password,
+            csrfmiddlewaretoken=csrf_token,
+            )
 
-    # login once
-    do_login(client, data)
-    do_logout(client)
+        # login once
+        do_login(client, data)
+        do_logout(client)
 
-    failure_limit = PwdtkSettings.PWDTK_USER_FAILURE_LIMIT
-    if not failure_limit:
-        logger.debug("PWDTK_USER_FAILURE_LIMIT not set. will skip test")
-        return
+        failure_limit = PwdtkSettings.PWDTK_USER_FAILURE_LIMIT
+        if not failure_limit:
+            logger.debug("PWDTK_USER_FAILURE_LIMIT not set. will skip test")
+            return
 
-    # only two bad logins
-    for cnt in range(failure_limit - 1):
-        logger.debug("bad login %d", cnt)
+        # only two bad logins
+        for cnt in range(failure_limit - 1):
+            logger.debug("bad login %d", cnt)
+            resp = do_login(client, data, use_good_password=False)
+            assert resp.status_code == 200
+
+        # Now logging in should still work
+        do_login(client, data)
+
+        do_logout(client)
+        # now two bad logins
+        for cnt in range(failure_limit - 1):
+            logger.debug("bad login %d", cnt)
+            resp = do_login(client, data, use_good_password=False)
+            assert resp.status_code == 200
+
+        # Now the final bad login
         resp = do_login(client, data, use_good_password=False)
-        assert resp.status_code == 200
+        assert resp.status_code == 403
 
-    # Now logging in should still work
-    do_login(client, data)
+        # Now logging in should fail
+        do_login(client, data, shall_pass=False)
 
-    do_logout(client)
-    # now two bad logins
-    for cnt in range(failure_limit - 1):
-        logger.debug("bad login %d", cnt)
-        resp = do_login(client, data, use_good_password=False)
-        assert resp.status_code == 200
+        # now let's check out the lockout delay
+        # pwdtk data will be populate after first login attempt
+        user = User.objects.get(username=username)
+        pwdtk_data = user.pwdtk_data
+        assert pwdtk_data.locked
+        logger.debug("AGE %i", pwdtk_data.fail_age)
 
-    # Now the final bad login
-    resp = do_login(client, data, use_good_password=False)
-    assert resp.status_code == 403
+    @pytest.mark.django_db
+    def test_pwd_expire(self, two_users):  # noqa: F811
+        """ test whether a password renewal is demanded if a password
+            has not been changed for a given time.
+        """
 
-    # Now logging in should fail
-    do_login(client, data, shall_pass=False)
+        browser = "Mozilla/5.0"
+        client = Client(browser=browser)
 
-    # now let's check out the lockout delay
-    # pwdtk data will be populate after first login attempt
-    user = User.objects.get(username=username)
-    pwdtk_data = user.pwdtk_data
-    assert pwdtk_data.locked
-    logger.debug("AGE %i", pwdtk_data.fail_age)
+        user = two_users[0]
+        username = user.username
+        password = user.raw_password
 
+        # # go to a login page and fetch csrf token
+        url = AUTH_URL + "login/?next=" + AUTH_URL
 
-@pytest.mark.django_db
-def test_pwd_expire(two_users):  # noqa: F811
-    """ test whether a password renewal is demanded if a password
-        has not been changed for a given time.
-    """
+        resp = client.get(url)
 
-    browser = "Mozilla/5.0"
-    client = Client(browser=browser)
+        csrf_token = resp.cookies.get('csrf_token')
+        # prepare post_data
 
-    user = two_users[0]
-    username = user.username
-    password = user.raw_password
+        password += '1'
+        user.set_password(password)
+        user.save()
 
-    # # go to a login page and fetch csrf token
-    url = AUTH_URL + "login/?next=" + AUTH_URL
+        data = dict(
+            username=username,
+            password=password,
+            csrfmiddlewaretoken=csrf_token,
+            )
+        do_login(client, data)
 
-    resp = client.get(url)
+        # pwdtk data will be populate after first login
+        user = User.objects.get(username=username)
+        pwdtk_data = user.pwdtk_data
 
-    csrf_token = resp.cookies.get('csrf_token')
-    # prepare post_data
-
-    password += '1'
-    user.set_password(password)
-    user.save()
-
-    data = dict(
-        username=username,
-        password=password,
-        csrfmiddlewaretoken=csrf_token,
+        # make passwd obsolete
+        pwdtk_data.last_change_time = (
+            timezone.now() -
+            datetime.timedelta(seconds=PwdtkSettings.PWDTK_PASSWD_AGE)
         )
-    do_login(client, data)
+        pwdtk_data.save()
+        assert pwdtk_data.compute_must_renew()
 
-    # pwdtk data will be populate after first login
-    user = User.objects.get(username=username)
-    pwdtk_data = user.pwdtk_data
+        # now login should fail
+        do_login(client, data)
 
-    # make passwd obsolete
-    pwdtk_data.last_change_time = (
-        timezone.now() -
-        datetime.timedelta(seconds=PwdtkSettings.PWDTK_PASSWD_AGE)
-    )
-    pwdtk_data.save()
-    assert pwdtk_data.compute_must_renew()
+        user = User.objects.get(username=username)
+        assert user.pwdtk_data.must_renew
 
-    # now login should fail
-    do_login(client, data)
+        with self.assertRaises(ValidationError):
+            password_validation.validate_password(password, user)
 
-    user = User.objects.get(username=username)
-    assert user.pwdtk_data.must_renew
+        user.set_password(password)
+        user.save()
+        assert not user.pwdtk_data.must_renew
 
-    user.set_password(password)
-    user.save()
-    assert user.pwdtk_data.must_renew
-
-    user.set_password(password+"2")
-    user.save()
-    assert not user.pwdtk_data.must_renew
+        user.set_password(password+"2")
+        user.save()
+        assert not user.pwdtk_data.must_renew
