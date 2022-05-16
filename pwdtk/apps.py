@@ -1,9 +1,10 @@
 import logging
 
 from django.apps import AppConfig
-from django.contrib.auth import get_user_model
+from django.conf import settings
 
 from pwdtk.helpers import PwdtkSettings
+from pwdtk import settings as pwdtk_settings
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,20 @@ class PwdTkConfig(AppConfig):
             logger.debug("PWDTK DISABLED")
             return
 
-        User = get_user_model()
-        from pwdtk.watchers import watch_set_password
-        User.set_password = watch_set_password(User.set_password)
+        validator_name = getattr(
+            PwdtkSettings,
+            "PWDTK_PASSWORD_VALIDATOR",
+            pwdtk_settings.PWDTK_PASSWORD_VALIDATOR)
+        validator_options = getattr(
+            PwdtkSettings,
+            "PWDTK_PASSWORD_VALIDATOR_OPTIONS",
+            pwdtk_settings.PWDTK_PASSWORD_VALIDATOR_OPTIONS)
+
+        for password_validator in settings.AUTH_PASSWORD_VALIDATORS:
+            if password_validator["NAME"] == validator_name:
+                break
+        else:
+            settings.AUTH_PASSWORD_VALIDATORS.append({
+                "NAME": validator_name,
+                "OPTIONS": validator_options
+            })
