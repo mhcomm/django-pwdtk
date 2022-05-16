@@ -21,7 +21,11 @@ class PwdTkValidator(object):
 
     def password_changed(self, password, user=None):
 
-        if user and hasattr(user, 'pwdtk_data'):
+        if (
+            user and
+            hasattr(user, 'pwdtk_data') and
+            not user.check_password(password)
+        ):
             now = timezone.now()
             user.pwdtk_data.password_history.insert(0, (now, user.password))
             user.pwdtk_data.password_history[
