@@ -104,7 +104,7 @@ test_1:
     - pip install -U tox
     - tox -e py27-django1,py35-django1,
 
-test_21:
+test_22:
   tags:
     - shell
   stage: test

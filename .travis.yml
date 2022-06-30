@@ -6,7 +6,7 @@ matrix:
  - python: 3.6
    env: DJANGO_VER_OR_TAG=django1
  - python: 3.6
-   env: DJANGO_VER_OR_TAG=django21
+   env: DJANGO_VER_OR_TAG=django22
 
 install:
   - pip install -U pip
