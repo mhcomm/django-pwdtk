@@ -6,6 +6,7 @@ import datetime
 from django.conf import settings
 from django_jsonfield_backport.models import JSONField
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
