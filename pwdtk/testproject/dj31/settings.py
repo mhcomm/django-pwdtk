@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django_jsonfield_backport',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pwdtk',
