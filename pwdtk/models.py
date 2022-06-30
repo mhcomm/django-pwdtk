@@ -4,7 +4,6 @@ import pytz
 
 from django.conf import settings
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils import timezone
 
 from django_jsonfield_backport.models import JSONField
@@ -14,7 +13,6 @@ from pwdtk.helpers import PwdtkSettings
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-@python_2_unicode_compatible
 class PwdData(models.Model):
     """ a model in case no custom way is specified for storing related data
     """
