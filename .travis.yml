@@ -4,9 +4,9 @@ matrix:
  - python: 3.6
    env: DJANGO_VER_OR_TAG=lint
  - python: 3.6
-   env: DJANGO_VER_OR_TAG=django1
- - python: 3.6
    env: DJANGO_VER_OR_TAG=django22
+   - python: 3.6
+   env: DJANGO_VER_OR_TAG=django31 
 
 install:
   - pip install -U pip
