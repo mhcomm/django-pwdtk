@@ -3,7 +3,6 @@ import logging
 
 from six.moves.urllib.parse import urlencode
 
-import django
 from django.core.exceptions import MiddlewareNotUsed
 from django.http import HttpResponse
 from django.shortcuts import redirect
