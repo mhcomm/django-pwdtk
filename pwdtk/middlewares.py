@@ -87,7 +87,7 @@ class PwdtkMiddleware(MiddlewareMixin):
         if self.must_renew_password(request):
             if request.is_ajax():
                 return HttpResponse(
-                    json.dumps(context),
+                    json.dumps({"status": "PWDTK_NEED_RENEW_PASSWORD"}),
                     content_type='application/json',
                     status=403,
                     )
@@ -99,7 +99,7 @@ class PwdtkMiddleware(MiddlewareMixin):
         if self.must_renew_password(request):
             if request.is_ajax():
                 return HttpResponse(
-                    json.dumps(context),
+                    json.dumps({"status": "PWDTK_NEED_RENEW_PASSWORD"}),
                     content_type='application/json',
                     status=403,
                     )
