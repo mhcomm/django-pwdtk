@@ -16,6 +16,7 @@ except: # noqa E722
         pass
 
 
+from pwdtk.auth_backends import PwdtkForceRenewException
 from pwdtk.auth_backends import PwdtkLockedException
 from pwdtk.helpers import PwdtkSettings
 from pwdtk.models import PwdData
@@ -38,18 +39,12 @@ class PwdtkMiddleware(MiddlewareMixin):
         else:
             super(PwdtkMiddleware, self).__init__()
 
-    def must_renew_password(self, request, response):
+    def must_renew_password(self, request):
 
         if request.method == 'GET':
             return False
 
-        if django.VERSION < (1, 10):
-            is_authenticated = request.user and request.user.is_authenticated()
-        else:
-            is_authenticated = request.user and request.user.is_authenticated
-
-        if not is_authenticated and not response:
-            # django rest ObtainAuthToken do authenticate whitout login
+        if not request.user.is_authenticated:
             return False
 
         if not PwdData.get_or_create_for_user(request.user).must_renew:
@@ -81,11 +76,19 @@ class PwdtkMiddleware(MiddlewareMixin):
                     )
                 )
             return lockout_response(request, exception.pwdtk_data)
+
+        if isinstance(exception, PwdtkForceRenewException):
+            return HttpResponse(
+                json.dumps({"status": "PWDTK_NEED_RENEW_PASSWORD"}),
+                content_type='application/json',
+                status=403,
+                )
+
         return None
 
     def process_request(self, request):
 
-        if self.must_renew_password(request, response=False):
+        if self.must_renew_password(request):
             if request.is_ajax():
                 return HttpResponse(
                     json.dumps({"status": "PWDTK_NEED_RENEW_PASSWORD"}),
@@ -97,7 +100,7 @@ class PwdtkMiddleware(MiddlewareMixin):
 
     def process_response(self, request, response):
 
-        if self.must_renew_password(request, response=response):
+        if self.must_renew_password(request):
             if request.is_ajax():
                 return HttpResponse(
                     json.dumps({"status": "PWDTK_NEED_RENEW_PASSWORD"}),

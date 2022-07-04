@@ -8,18 +8,26 @@ import logging
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 
+from pwdtk.helpers import classname
 from pwdtk.helpers import PwdtkSettings
 from pwdtk.models import PwdData
 
 logger = logging.getLogger(__name__)
 
 
-class PwdtkLockedException(Exception):
-    """ custom exception """
+class PwdtkBaseException(Exception):
 
     def __init__(self, pwdtk_data):
 
         self.pwdtk_data = pwdtk_data
+
+
+class PwdtkLockedException(PwdtkBaseException):
+    """ custom exception """
+
+
+class PwdtkForceRenewException(PwdtkBaseException):
+    """ custom exception """
 
 
 class PwdtkBackend(ModelBackend):
@@ -35,7 +43,10 @@ class PwdtkBackend(ModelBackend):
             pwdtk_data = PwdData.get_or_create_for_user(user)
             if pwdtk_data.is_locked():
                 raise PwdtkLockedException(pwdtk_data)
-            if user.check_password(password):
+            if (
+                user.check_password(password)
+                and self.user_can_authenticate(user)
+            ):
                 must_renew = pwdtk_data.compute_must_renew()
                 if (pwdtk_data.failed_logins or pwdtk_data.fail_time or
                    pwdtk_data.locked or must_renew != pwdtk_data.must_renew):
@@ -44,6 +55,12 @@ class PwdtkBackend(ModelBackend):
                     pwdtk_data.locked = False
                     pwdtk_data.must_renew = must_renew
                     pwdtk_data.save()
+                if (
+                    classname(request)
+                    in PwdtkSettings.PWDTK_RAISE_MUST_RENEW_CLASSES
+                    and must_renew
+                ):
+                    raise PwdtkForceRenewException(pwdtk_data)
                 return user
             else:
                 if PwdtkSettings.PWDTK_USER_FAILURE_LIMIT is None:

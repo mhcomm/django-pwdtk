@@ -79,10 +79,12 @@ class PwdData(models.Model):
                 PwdtkSettings.PWDTK_PASSWD_AGE)
 
     def get_lockout_context(self):
-
         return {
             "username": self.user.username,
             "lockout_time": PwdtkSettings.PWDTK_LOCKOUT_TIME,
             "failed_logins": self.failed_logins,
-            "fail_time": self.aware_fail_time.isoformat(),
+            "fail_time": (
+                        self.aware_fail_time.isoformat()
+                        if self.fail_time else None
+                    ),
         }

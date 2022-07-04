@@ -39,6 +39,8 @@ PWDTK_LOGIN_VIEW_CLASS = 'django.contrib.auth.views.LoginView'
 # PWDTK Passsword lockout after logins with bad password
 # ----------------------------------------------------------
 
+PWDTK_RAISE_MUST_RENEW_CLASSES = ["rest_framework.request.Request", ]
+
 
 # Time in seconds to lockout a user who entered a bad password too iften
 PWDTK_LOCKOUT_TIME = 60
