@@ -85,11 +85,24 @@ class PwdtkMiddleware(MiddlewareMixin):
     def process_request(self, request):
 
         if self.must_renew_password(request):
+            if request.is_ajax():
+                return HttpResponse(
+                    json.dumps(context),
+                    content_type='application/json',
+                    status=403,
+                    )
+
             return redirect(reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW))
 
     def process_response(self, request, response):
 
         if self.must_renew_password(request):
+            if request.is_ajax():
+                return HttpResponse(
+                    json.dumps(context),
+                    content_type='application/json',
+                    status=403,
+                    )
             return redirect(reverse(PwdtkSettings.PWDTK_PASSWD_CHANGE_VIEW))
 
         return response
