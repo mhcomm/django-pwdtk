@@ -38,7 +38,7 @@ class PwdtkMiddleware(MiddlewareMixin):
         else:
             super(PwdtkMiddleware, self).__init__()
 
-    def must_renew_password(self, request):
+    def must_renew_password(self, request, response):
 
         if request.method == 'GET':
             return False
@@ -48,7 +48,7 @@ class PwdtkMiddleware(MiddlewareMixin):
         else:
             is_authenticated = request.user and request.user.is_authenticated
 
-        if not is_authenticated:
+        if not is_authenticated and not response:  # django rest ObtainAuthToken do authenticate whitout login
             return False
 
         if not PwdData.get_or_create_for_user(request.user).must_renew:
@@ -84,7 +84,7 @@ class PwdtkMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
 
-        if self.must_renew_password(request):
+        if self.must_renew_password(request, response=False):
             if request.is_ajax():
                 return HttpResponse(
                     json.dumps({"status": "PWDTK_NEED_RENEW_PASSWORD"}),
@@ -96,7 +96,7 @@ class PwdtkMiddleware(MiddlewareMixin):
 
     def process_response(self, request, response):
 
-        if self.must_renew_password(request):
+        if self.must_renew_password(request, response=response):
             if request.is_ajax():
                 return HttpResponse(
                     json.dumps({"status": "PWDTK_NEED_RENEW_PASSWORD"}),
