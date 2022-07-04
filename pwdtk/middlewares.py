@@ -49,7 +49,7 @@ class PwdtkMiddleware(MiddlewareMixin):
             is_authenticated = request.user and request.user.is_authenticated
 
         if not is_authenticated and not response:
-        # django rest ObtainAuthToken do authenticate whitout login
+            # django rest ObtainAuthToken do authenticate whitout login
             return False
 
         if not PwdData.get_or_create_for_user(request.user).must_renew:
