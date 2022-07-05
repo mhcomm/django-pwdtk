@@ -43,7 +43,7 @@ class PwdtkMiddleware(MiddlewareMixin):
         if request.method == 'GET':
             return False
 
-        if not request.user.is_authenticated:
+        if not (request.user and request.user.is_authenticated):
             return False
 
         if not PwdData.get_or_create_for_user(request.user).must_renew:
