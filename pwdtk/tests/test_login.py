@@ -107,7 +107,7 @@ def test_login(two_users):  # noqa: F811
     logger.debug("loginurl = %s", url)
     resp = client.get(url)
     assert hasattr(resp, 'cookies')
-    csrf_token = resp.cookies.get('csrf_token')
+    csrf_token = resp.cookies.get('csrftoken')
     logger.debug("token %r", csrf_token)
 
     # prepare post_data
@@ -175,7 +175,7 @@ def test_pwd_expire(two_users):  # noqa: F811
 
     resp = client.get(url)
 
-    csrf_token = resp.cookies.get('csrf_token')
+    csrf_token = resp.cookies.get('csrftoken')
     # prepare post_data
 
     password += '1'

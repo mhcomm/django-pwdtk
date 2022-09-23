@@ -104,7 +104,7 @@ test_1:
     - pip install -U tox
     - tox -e py27-django1,py35-django1,
 
-test_21:
+test_22:
   tags:
     - shell
   stage: test
@@ -117,5 +117,19 @@ test_21:
     - ". eenv/bin/activate"
     - python -V
     - pip install -U tox
-    - tox -e py35-django21,py36-django21
+    - tox -e py35-django22,py36-django22
 
+test_31:
+  tags:
+    - shell
+  stage: test
+  allow_failure: true
+  retry:
+      max: 2
+      when:
+        - runner_system_failure
+  script:
+    - ". eenv/bin/activate"
+    - python -V
+    - pip install -U tox
+    - tox -e py36-django31

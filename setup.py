@@ -6,7 +6,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 install_requires = [
-    "django-jsonfield",
+    "django-jsonfield-backport",
     "future",
     "minibelt",
     "python-dateutil",
@@ -14,7 +14,7 @@ install_requires = [
     ]
 
 
-long_description="""package to tune django password authentification
+long_description = """package to tune django password authentification
 
 It spans a rather wide range of python and django versions and supports:
 - temporary lockout after too many bad logins.
@@ -25,8 +25,8 @@ setup(
     name="django-pwdtk",
     version="0.5.0",
     description="package to tune django password authentification",
-    #long_description=long_description,
-    #long_description_content_type="text/x-rst",
+    # long_description=long_description,
+    # long_description_content_type="text/x-rst",
     classifiers=[
         "Development Status :: 3 - Alpha",
         ],
