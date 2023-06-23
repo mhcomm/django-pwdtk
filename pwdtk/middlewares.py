@@ -7,6 +7,7 @@ from django.core.exceptions import MiddlewareNotUsed
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
+from django_user_agents.utils import get_user_agent
 
 try:
     from django.utils.deprecation import MiddlewareMixin
@@ -61,7 +62,7 @@ class PwdtkMiddleware(MiddlewareMixin):
 
         if isinstance(exception, PwdtkLockedException):
             context = exception.pwdtk_data.get_lockout_context()
-            if request.is_ajax():
+            if get_user_agent(request).is_mobile:
                 return HttpResponse(
                     json.dumps(context),
                     content_type='application/json',
@@ -88,7 +89,7 @@ class PwdtkMiddleware(MiddlewareMixin):
     def process_request(self, request):
 
         if self.must_renew_password(request):
-            if request.is_ajax():
+            if get_user_agent(request).is_mobile:
                 return HttpResponse(
                     json.dumps({"status": "PWDTK_NEED_RENEW_PASSWORD"}),
                     content_type='application/json',
@@ -100,7 +101,7 @@ class PwdtkMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
 
         if self.must_renew_password(request):
-            if request.is_ajax():
+            if get_user_agent(request).is_mobile:
                 return HttpResponse(
                     json.dumps({"status": "PWDTK_NEED_RENEW_PASSWORD"}),
                     content_type='application/json',

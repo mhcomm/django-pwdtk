@@ -75,6 +75,8 @@ class PwdData(models.Model):
         """
         if getattr(self.user, "disable_must_renew", False):
             return False
+        if PwdtkSettings.PWDTK_PASSWD_AGE == 0:
+            return False
         return ((timezone.now() - self.last_change_time).total_seconds() >
                 PwdtkSettings.PWDTK_PASSWD_AGE)
 
