@@ -19,7 +19,8 @@ class PwdData(models.Model):
     """
     user = models.OneToOneField(AUTH_USER_MODEL,
                                 related_name='pwdtk_data',
-                                on_delete=models.CASCADE)
+                                on_delete=models.CASCADE, null=True)
+    fake_username = models.CharField(max_length=150, unique=True, null=True)
     locked = models.BooleanField(default=False)
     failed_logins = models.PositiveIntegerField(default=0)
     fail_time = models.DateTimeField(null=True)
@@ -31,11 +32,12 @@ class PwdData(models.Model):
     def get_or_create_for_user(cls, user):
         if not hasattr(user, 'pwdtk_data'):
             user.pwdtk_data = cls.objects.create(user=user)
+            cls.objects.filter(fake_username=user.username).delete()
 
         return user.pwdtk_data
 
     def __str__(self):
-        return("%r, %r" % (self.user.id, self.user.username))
+        return("%r, %r" % ((self.user.id, self.user.username) if self.user else ("-", self.fake_username)))
 
     def set_locked(self, failed_logins=None):
         if failed_logins is not None:
@@ -82,7 +84,7 @@ class PwdData(models.Model):
 
     def get_lockout_context(self):
         return {
-            "username": self.user.username,
+            "username": self.user.username if self.user else self.fake_username,
             "lockout_time": PwdtkSettings.PWDTK_LOCKOUT_TIME,
             "failed_logins": self.failed_logins,
             "fail_time": (
