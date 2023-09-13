@@ -1,13 +1,9 @@
 import json
 import logging
 
-from six.moves.urllib.parse import urlencode
 
 from django.core.exceptions import MiddlewareNotUsed
 from django.http import HttpResponse
-from django.shortcuts import redirect
-from django.urls import reverse
-from django_user_agents.utils import get_user_agent
 
 try:
     from django.utils.deprecation import MiddlewareMixin
@@ -19,8 +15,6 @@ except: # noqa E722
 from pwdtk.auth_backends import PwdtkForceRenewException
 from pwdtk.auth_backends import PwdtkLockedException
 from pwdtk.helpers import PwdtkSettings
-from pwdtk.models import PwdData
-from pwdtk.views import lockout_response
 
 
 logger = logging.getLogger(__name__)
@@ -42,26 +36,6 @@ class PwdtkMiddleware(MiddlewareMixin):
     def process_request(self, request):
         if hasattr(PwdtkSettings, "reset_cache"):
             PwdtkSettings.reset_cache()
-
-    def process_exception(self, request, exception):
-
-        if isinstance(exception, PwdtkLockedException):
-            context = exception.pwdtk_data.get_lockout_context()
-            context["status"] = "PWDTK_LOCKED"
-            return HttpResponse(
-                json.dumps(context),
-                content_type='application/json',
-                status=403,
-                )
-
-        if isinstance(exception, PwdtkForceRenewException):
-            return HttpResponse(
-                json.dumps({"status": "PWDTK_NEED_RENEW_PASSWORD"}),
-                content_type='application/json',
-                status=403,
-                )
-
-        return None
 
     def process_exception(self, request, exception):
 

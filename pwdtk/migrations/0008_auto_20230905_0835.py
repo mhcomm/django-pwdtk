@@ -21,6 +21,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='pwddata',
             name='user',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='pwdtk_data', to=settings.AUTH_USER_MODEL),
+            field=models.OneToOneField(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='pwdtk_data',
+                to=settings.AUTH_USER_MODEL),
         ),
     ]

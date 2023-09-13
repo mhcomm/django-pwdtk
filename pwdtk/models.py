@@ -37,7 +37,7 @@ class PwdData(models.Model):
         return user.pwdtk_data
 
     def __str__(self):
-        return("%r, %r" % ((self.user.id, self.user.username) if self.user else ("-", self.fake_username)))
+        return ("%r, %r" % ((self.user.id, self.user.username) if self.user else ("-", self.fake_username)))
 
     def set_locked(self, failed_logins=None):
         if failed_logins is not None:
