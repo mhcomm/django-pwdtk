@@ -57,7 +57,7 @@ def watch_set_password(orig_set_password):
             logger.debug("password change detected")
             orig_set_password(self, password)
             if hasattr(self, 'pwdtk_data'):
-                now = timezone.now()
+                now = timezone.now().isoformat()
                 self.pwdtk_data.password_history.insert(
                     0, (now, self.password))
                 self.pwdtk_data.password_history[

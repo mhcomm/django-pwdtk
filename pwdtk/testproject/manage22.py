@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.realpath(
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE",
-                          "pwdtk.testproject.dj21.settings")
+                          "pwdtk.testproject.dj22.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
