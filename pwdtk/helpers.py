@@ -8,15 +8,6 @@ import six
 from django.conf import settings
 
 
-def classname(obj):
-    cls = type(obj)
-    module = cls.__module__
-    name = cls.__qualname__
-    if module is not None and module != "__builtin__":
-        name = module + "." + name
-    return name
-
-
 def recursion_depth():
     """return recursion depth. 0 if no recursion"""
     # taken from https://github.com/looking-for-a-job/recursion-detect.py
