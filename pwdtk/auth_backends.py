@@ -34,10 +34,10 @@ class PwdtkBackend(ModelBackend):
     Authenticates against settings.AUTH_USER_MODEL.
     """
     def compute_failed_login(self, pwdtk_data):
+
         if PwdtkSettings.PWDTK_USER_FAILURE_LIMIT is None:
             return None
-        if (pwdtk_data.failed_logins+1 >=
-           PwdtkSettings.PWDTK_USER_FAILURE_LIMIT):
+        if pwdtk_data.failed_logins+1 >= PwdtkSettings.PWDTK_USER_FAILURE_LIMIT:
             pwdtk_data.set_locked(pwdtk_data.failed_logins+1)
             raise PwdtkLockedException(pwdtk_data)
         else:
@@ -55,7 +55,7 @@ class PwdtkBackend(ModelBackend):
             pwdtk_data = PwdData.get_or_create_for_user(user)
             if pwdtk_data.is_locked():
                 raise PwdtkLockedException(pwdtk_data)
-            if (user.check_password(password) and self.user_can_authenticate(user)):
+            if user.check_password(password) and self.user_can_authenticate(user):
                 must_renew = pwdtk_data.compute_must_renew()
                 if (pwdtk_data.failed_logins or pwdtk_data.fail_time or
                    pwdtk_data.locked or must_renew != pwdtk_data.must_renew):
@@ -67,8 +67,9 @@ class PwdtkBackend(ModelBackend):
                 if must_renew and not kwargs.get("ignore_must_renew"):
                     raise PwdtkForceRenewException(pwdtk_data)
                 return user
-            else:
-                self.compute_failed_login(pwdtk_data)
+
+            self.compute_failed_login(pwdtk_data)
+
         except UserModel.DoesNotExist:
             # Run the default password hasher once to reduce the timing
             # difference between an existing and a non-existing user (#20760).
