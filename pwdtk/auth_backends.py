@@ -34,6 +34,8 @@ class PwdtkBackend(ModelBackend):
     Authenticates against settings.AUTH_USER_MODEL.
     """
     def compute_failed_login(self, pwdtk_data):
+        # we check if we need to raise the PWDTK_USER_FAILURE_LIMIT
+        # or increment login fail counter
 
         if PwdtkSettings.PWDTK_USER_FAILURE_LIMIT is None:
             return None
