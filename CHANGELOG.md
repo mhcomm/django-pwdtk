@@ -1,5 +1,12 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v1.0.0](https://github.com/mhcomm/django-pwdtk/compare/v0.4.0...v1.0.0)
+* break django 1.11 compatibility
+* break python < 3.7 compatibility
+* security fix: block logins with non existing user names after count
+* add support for django 3.1
+* new redirect policy (no more default redirect)
+* major restructuring. breaks compatibility with 0.4.0
 ## [v0.4.0](https://github.com/mhcomm/django-pwdtk/compare/v0.3.1...v0.4.0)
 * break django 1.8 compatibility
 * add support for django 2.2
