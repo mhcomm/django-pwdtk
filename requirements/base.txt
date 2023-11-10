@@ -1,3 +1,7 @@
 future
 minibelt<0.2.0
 python-dateutil
+pyyaml
+ua-parser
+user-agents
+django-user-agents
