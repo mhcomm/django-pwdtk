@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 import datetime
 from django.conf import settings
-from django_jsonfield_backport.models import JSONField
+from pwdtk.models import json_field
 
 
 class Migration(migrations.Migration):
@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='pwddata',
             name='password_history',
-            field=JSONField(default=[]),
+            field=json_field(default=[]),
         ),
         migrations.AddField(
             model_name='pwddata',

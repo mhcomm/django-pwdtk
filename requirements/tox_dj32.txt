@@ -1,0 +1,3 @@
+-r tox.txt
+django<3.3,>=3.2
+django-jsonfield-backport

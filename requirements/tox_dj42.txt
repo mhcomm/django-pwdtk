@@ -1,0 +1,2 @@
+-r tox.txt
+django<4.3,>=4.2
