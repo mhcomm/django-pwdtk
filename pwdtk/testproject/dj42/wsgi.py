@@ -1,5 +1,5 @@
 """
-WSGI config for dj31 project.
+WSGI config for dj42 project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

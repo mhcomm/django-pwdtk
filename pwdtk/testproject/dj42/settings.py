@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django_jsonfield_backport',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pwdtk',
@@ -65,7 +64,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'pwdtk.testproject.dj31.urls'
+ROOT_URLCONF = 'pwdtk.testproject.dj42.urls'
 
 # PWDTK specifics
 # For MH authentification back end
@@ -91,7 +90,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'pwdtk.testproject.dj31.wsgi.application'
+WSGI_APPLICATION = 'pwdtk.testproject.dj42.wsgi.application'
 
 
 # Database
