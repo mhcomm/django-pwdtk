@@ -133,3 +133,33 @@ test_31:
     - python -V
     - pip install -U tox
     - tox -e py36-django31
+
+test_32:
+  tags:
+    - shell
+  stage: test
+  allow_failure: true
+  retry:
+      max: 2
+      when:
+        - runner_system_failure
+  script:
+    - ". eenv/bin/activate"
+    - python -V
+    - pip install -U tox
+    - tox -e py36-django32
+
+test_42:
+  tags:
+    - shell
+  stage: test
+  allow_failure: true
+  retry:
+      max: 2
+      when:
+        - runner_system_failure
+  script:
+    - ". eenv/bin/activate"
+    - python -V
+    - pip install -U tox
+    - tox -e py38-django42
