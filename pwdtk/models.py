@@ -2,15 +2,26 @@ from __future__ import absolute_import
 
 import pytz
 
+import django
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
-from django_jsonfield_backport.models import JSONField
-
 from pwdtk.helpers import PwdtkSettings
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+
+
+def json_field(**kwargs):
+    """
+    Backward-compatible JSONField
+    """
+    if django.VERSION < (4, ):
+        from django_jsonfield_backport.models import JSONField
+        return JSONField(**kwargs)
+    else:
+        from django.db.models import JSONField
+        return JSONField(**kwargs)
 
 
 class PwdData(models.Model):
@@ -25,7 +36,7 @@ class PwdData(models.Model):
     fail_time = models.DateTimeField(null=True)
     must_renew = models.BooleanField(default=False)
     last_change_time = models.DateTimeField(default=timezone.now)
-    password_history = JSONField(default=[])
+    password_history = json_field(default=[])
 
     @classmethod
     def get_or_create_for_user(cls, user):
