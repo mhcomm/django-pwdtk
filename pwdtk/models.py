@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import pytz
-
 import django
 from django.conf import settings
 from django.db import models
@@ -74,8 +72,14 @@ class PwdData(models.Model):
         if timezone.is_aware(self.fail_time):
             return self.fail_time
         else:
-            return pytz.timezone(
-                PwdtkSettings.TIME_ZONE).localize(self.fail_time)
+            if django.VERSION < (4, 0):
+                import pytz
+                return pytz.timezone(
+                    PwdtkSettings.TIME_ZONE).localize(self.fail_time)
+            else:
+                from zoneinfo import ZoneInfo
+                return self.fail_time.replace(
+                    tzinfo=ZoneInfo(PwdtkSettings.TIME_ZONE))
 
     @property
     def fail_age(self):
