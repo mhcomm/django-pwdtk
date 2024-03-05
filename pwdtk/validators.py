@@ -245,10 +245,11 @@ class PasswordAgeValidator:
         now = timezone.now()
 
         with transaction.atomic():
-            pwdtk_data.refresh_from_db(fields=['last_change_time', 'must_renew'])
+            pwdtk_data.refresh_from_db(fields=['last_change_time', 'must_renew', 'first_password'])
             pwdtk_data.last_change_time = now.isoformat()
+            pwdtk_data.first_password = False
             pwdtk_data.must_renew = False
-            pwdtk_data.save(update_fields=['last_change_time', 'must_renew'])
+            pwdtk_data.save(update_fields=['last_change_time', 'must_renew', 'first_password'])
 
         return pwdtk_data
 

@@ -36,8 +36,9 @@ class PwdData(models.Model):
     fail_time = models.DateTimeField(null=True)
     must_renew = models.BooleanField(default=False)
     last_change_time = models.DateTimeField(default=timezone.now)
-    password_history = json_field(default=[])
+    password_history = json_field(default=list)
     locked_until = models.DateTimeField(null=True)
+    first_password = models.BooleanField(default=True)
 
     @classmethod
     def get_or_create_for_user(cls, user):
@@ -104,6 +105,8 @@ class PwdData(models.Model):
         from pwdtk.validators import PasswordAgeValidator
         if getattr(self.user, "disable_must_renew", False):
             return False
+        if self.first_password and PwdtkSettings.PWDTK_RENEW_ON_FIRST_LOGIN:
+            return True
         if PwdtkSettings.PWDTK_PASSWD_AGE == 0:
             return False
         max_ages = [validator.max_age for validator in get_default_password_validators()
