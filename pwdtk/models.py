@@ -25,7 +25,8 @@ class PwdData(models.Model):
     fail_time = models.DateTimeField(null=True)
     must_renew = models.BooleanField(default=False)
     last_change_time = models.DateTimeField(default=timezone.now)
-    password_history = JSONField(default=[])
+    password_history = JSONField(default=list)
+    first_password = models.BooleanField(default=True)
 
     @classmethod
     def get_or_create_for_user(cls, user):
@@ -76,6 +77,8 @@ class PwdData(models.Model):
         """
         if getattr(self.user, "disable_must_renew", False):
             return False
+        if self.first_password and PwdtkSettings.PWDTK_RENEW_ON_FIRST_LOGIN:
+            return True
         if PwdtkSettings.PWDTK_PASSWD_AGE == 0:
             return False
         return ((timezone.now() - self.last_change_time).total_seconds() >
