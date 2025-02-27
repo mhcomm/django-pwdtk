@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.7", "3.8"]
-        django-version: ["dj22", "dj31"]
+        django-version: ["dj22", "dj31", "dj42"]
     steps:
         - uses: actions/checkout@v2
         - name: setup python
@@ -34,6 +34,7 @@ jobs:
         #     python -m isort --show-files setup.py pwdtk
         #     python -m isort --diff --check setup.py pwdtk
         - name: pytest
+          if: ${{ !(matrix.django-version == 'dj42' && matrix.python-version == '3.7') }}
           run: |
             python -m pip install nose
             python -m pip install wheel
