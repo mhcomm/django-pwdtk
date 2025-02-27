@@ -87,3 +87,11 @@ PWDTK_TEST_LOGIN_FAIL_SUBMSG = b'Please enter the correct'
 
 # message to be found in contents to detect a locked out user
 PWDTK_TEST_LOCKOUT_SUBMSG = b'So bad!'
+
+# Password validation settings
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'pwdtk.validators.PasswordHistoryValidator',
+    },
+]
+
