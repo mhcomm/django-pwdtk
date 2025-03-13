@@ -1,5 +1,17 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v2.0.0](https://github.com/mhcomm/django-pwdtk/compare/v1.1.0...v2.0.0)
+* Version bump to 2.0.0
+* Removed watchers
+* Add password history validation
+  - Prevents users from reusing their previous passwords
+  - Configurable history length via PWDTK_PASSWD_HISTORY_LEN setting
+  - Automatically tracks and stores password hashes with timestamps
+* Add regex-based password validation
+  - Enforces password complexity rules via regex patterns
+  - Configurable via PWDTK_PASSWORD_ALLOWED_PATTERN setting
+  - Customizable error messages with PWDTK_PASSWORD_DEFAULT_PATTERN_INFO
+  - Supports common patterns like requiring letters, numbers, and special characters
 ## [v1.1.0](https://github.com/mhcomm/django-pwdtk/compare/v1.0.0...v1.1.0)
 * add support for django 4.2
 ## [v1.0.0](https://github.com/mhcomm/django-pwdtk/compare/v0.4.0...v1.0.0)
