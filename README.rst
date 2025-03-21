@@ -13,4 +13,4 @@ like:
 
 This package provides solutions for these problems.
 PWDTK is compatible with python 2.7, and >=3.5
-It is compatible with django 1.11, 2.2
+It is compatible with django 2.2, 3.2 and 4.2
