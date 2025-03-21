@@ -35,6 +35,7 @@ class PwdData(models.Model):
     must_renew = models.BooleanField(default=False)
     last_change_time = models.DateTimeField(default=timezone.now)
     password_history = json_field(default=[])
+    lockout_count = models.PositiveIntegerField(default=0)
 
     @classmethod
     def get_or_create_for_user(cls, user):
