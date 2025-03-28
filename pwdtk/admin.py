@@ -15,5 +15,8 @@ class PwdDataAdmin(admin.ModelAdmin):
         'failed_logins',
         'fail_time',
         'last_change_time',
-        'must_renew',)
+        'must_renew',
+        'lockout_count',
+        'locked_until',
+        )
     search_fields = ('id', 'user')
