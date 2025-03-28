@@ -1,10 +1,4 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
-
-## [v2.1.0](https://github.com/mhcomm/django-pwdtk/compare/v2.0.0...v2.1.0)
-* Add lockout multiplier feature
-  - Introduces PWDTK_LOCKOUT_MULTIPLIER setting
-  - Increases lockout time with each consecutive lockout when a user fails PWDTK_USER_FAILURE_LIMIT times
-  - Enhances security by making repeated login attempts progressively more time-consuming
 ## [v2.0.0](https://github.com/mhcomm/django-pwdtk/compare/v1.1.0...v2.0.0)
 * Version bump to 2.0.0
 * Removed watchers
@@ -17,6 +11,10 @@
   - Configurable via PWDTK_PASSWORD_ALLOWED_PATTERN setting
   - Customizable error messages with PWDTK_PASSWORD_DEFAULT_PATTERN_INFO
   - Supports common patterns like requiring letters, numbers, and special characters
+* Add lockout multiplier feature
+  - Introduces PWDTK_LOCKOUT_MULTIPLIER setting
+  - Increases lockout time with each consecutive lockout when a user fails PWDTK_USER_FAILURE_LIMIT times
+  - Enhances security by making repeated login attempts progressively more time-consuming
 ## [v1.1.0](https://github.com/mhcomm/django-pwdtk/compare/v1.0.0...v1.1.0)
 * add support for django 4.2
 ## [v1.0.0](https://github.com/mhcomm/django-pwdtk/compare/v0.4.0...v1.0.0)
