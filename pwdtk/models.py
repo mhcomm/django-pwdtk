@@ -36,6 +36,7 @@ class PwdData(models.Model):
     must_renew = models.BooleanField(default=False)
     last_change_time = models.DateTimeField(default=timezone.now)
     password_history = json_field(default=[])
+    locked_until = models.DateTimeField(null=True)
 
     @classmethod
     def get_or_create_for_user(cls, user):
@@ -54,6 +55,7 @@ class PwdData(models.Model):
         self.locked = True
         self.fail_time = timezone.now()
         self.lockout_count += 1
+        self.locked_until = timezone.now() + timezone.timedelta(seconds=self.calculate_current_lockout_time())
         self.save()
 
     def calculate_current_lockout_time(self):
@@ -70,9 +72,7 @@ class PwdData(models.Model):
         if not self.locked:
             return False
 
-        current_lockout_time = self.calculate_current_lockout_time()
-
-        if self.fail_age < current_lockout_time:
+        if timezone.now() < self.locked_until:
             return True
 
         self.locked = False
@@ -97,34 +97,6 @@ class PwdData(models.Model):
     @property
     def fail_age(self):
         return int((timezone.now() - self.fail_time).total_seconds())
-
-    @property
-    def lockout_time_remaining(self):
-        """Return the remaining lockout time in seconds, or 0 if not locked."""
-        if not self.locked or not self.fail_time:
-            return 0
-
-        current_lockout_time = self.calculate_current_lockout_time()
-
-        remaining = current_lockout_time - self.fail_age
-        return max(0, remaining)
-
-    @property
-    def lockout_time_remaining_formatted(self):
-        """Return the remaining lockout time as a human-readable string."""
-        seconds = self.lockout_time_remaining
-        if seconds <= 0:
-            return "Not locked"
-
-        minutes, seconds = divmod(seconds, 60)
-        hours, minutes = divmod(minutes, 60)
-
-        if hours > 0:
-            return f"{hours}h {minutes}m {seconds}s"
-        elif minutes > 0:
-            return f"{minutes}m {seconds}s"
-        else:
-            return f"{seconds}s"
 
     def compute_must_renew(self):
         """ determines whether a user must renew his password

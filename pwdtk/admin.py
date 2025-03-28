@@ -17,9 +17,6 @@ class PwdDataAdmin(admin.ModelAdmin):
         'last_change_time',
         'must_renew',
         'lockout_count',
-        'lockout_time_remaining_formatted',
+        'locked_until',
         )
     search_fields = ('id', 'user')
-
-    def get_readonly_fields(self, request, obj=None):
-        return ['lockout_time_remaining_formatted'] + list(super().get_readonly_fields(request, obj))
