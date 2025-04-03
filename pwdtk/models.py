@@ -76,7 +76,6 @@ class PwdData(models.Model):
             return True
 
         self.locked = False
-        self.failed_logins = 0
         self.save()
         return False
 
