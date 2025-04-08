@@ -12,6 +12,8 @@
   - Configurable via PWDTK_PASSWORD_ALLOWED_PATTERN setting
   - Customizable error messages with PWDTK_PASSWORD_DEFAULT_PATTERN_INFO
   - Supports common patterns like requiring letters, numbers, and special characters
+## [v1.1.0](https://github.com/mhcomm/django-pwdtk/compare/v1.0.0...v1.1.0)
+* add support for django 4.2
 ## [v1.0.0](https://github.com/mhcomm/django-pwdtk/compare/v0.4.0...v1.0.0)
 * break django 1.11 compatibility
 * break python < 3.7 compatibility
