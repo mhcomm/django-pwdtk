@@ -95,11 +95,11 @@ class PwdData(models.Model):
             return False
         if PwdtkSettings.PWDTK_PASSWD_AGE == 0:
             return False
-        age_validators = [validator for validator in get_default_password_validators()
-                          if isinstance(validator, PasswordAgeValidator)]
-        if len(age_validators) == 0:
+        max_ages = [validator.max_age for validator in get_default_password_validators()
+                    if isinstance(validator, PasswordAgeValidator)]
+        if len(max_ages) == 0:
             return False
-        password_max_age = min(age_validators, key=lambda v: v.max_age)
+        password_max_age = min(max_ages)
         if password_max_age == 0:
             return False
         return ((timezone.now() - self.last_change_time).total_seconds() >
