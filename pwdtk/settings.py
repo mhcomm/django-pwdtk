@@ -66,6 +66,12 @@ PWDTK_PASSWD_AGE = 30 * 24 * 60 * 60
 # amount of passwords before and old password can be reused
 PWDTK_PASSWD_HISTORY_LEN = 3
 
+# Regular expression pattern that passwords must match
+PWDTK_PASSWORD_ALLOWED_PATTERN = ""
+
+# Human-readable explanation of the pattern for user feedback
+PWDTK_PASSWORD_DEFAULT_PATTERN_INFO = ""
+
 # template to display for password renewal
 PWDTK_PASSWD_CHANGE_VIEW = "password_change"
 
@@ -87,3 +93,16 @@ PWDTK_TEST_LOGIN_FAIL_SUBMSG = b'Please enter the correct'
 
 # message to be found in contents to detect a locked out user
 PWDTK_TEST_LOCKOUT_SUBMSG = b'So bad!'
+
+# Password validation settings
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'pwdtk.validators.PasswordHistoryValidator',
+    },
+    {
+        'NAME': 'pwdtk.validators.RegexPasswordValidator',
+    },
+    {
+        'NAME': 'pwdtk.validators.PasswordAgeValidator',
+    },
+]
