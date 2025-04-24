@@ -7,7 +7,6 @@ from django.db import models
 from django.utils import timezone
 
 from pwdtk.helpers import PwdtkSettings
-from pwdtk.validators import PasswordAgeValidator
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
@@ -91,6 +90,7 @@ class PwdData(models.Model):
     def compute_must_renew(self):
         """ determines whether a user must renew his password
         """
+        from pwdtk.validators import PasswordAgeValidator
         if getattr(self.user, "disable_must_renew", False):
             return False
         if PwdtkSettings.PWDTK_PASSWD_AGE == 0:
