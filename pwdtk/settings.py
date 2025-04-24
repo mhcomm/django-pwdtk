@@ -105,4 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'pwdtk.validators.RegexPasswordValidator',
     },
+    {
+        'NAME': 'pwdtk.validators.PasswordAgeValidator',
+    },
 ]

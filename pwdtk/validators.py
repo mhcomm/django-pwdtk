@@ -61,7 +61,7 @@ class PasswordHistoryValidator:
                 )
 
     def password_changed(self, password, user=None):
-        """Update password history and metadata after a successful change.
+        """Update password history after a successful change.
 
         Args:
             password (str): New password (unused but kept for API consistency).
@@ -71,8 +71,6 @@ class PasswordHistoryValidator:
             Should only be called after new password is successfully set.
             Updates:
             - password_history (adds current password)
-            - last_change_time (sets to current time)
-            - must_renew (sets to False)
 
         Returns:
             PwdData: The updated user password data object
@@ -91,23 +89,18 @@ class PasswordHistoryValidator:
         if not pwdtk_data.password_history or \
            pwdtk_data.password_history[0][1] != current_hash:
             with transaction.atomic():
-                pwdtk_data.refresh_from_db()
+                pwdtk_data.refresh_from_db(fields=['password_history'])
                 pwdtk_data.password_history.insert(
                     0, (now.isoformat(), current_hash)
                 )
                 if len(pwdtk_data.password_history) > self.history_length:
                     pwdtk_data.password_history = \
                         pwdtk_data.password_history[:self.history_length]
-
-                pwdtk_data.last_change_time = now.isoformat()
-                pwdtk_data.must_renew = False
-                pwdtk_data.save()
-
+                pwdtk_data.save(update_fields=['password_history'])
                 pwd_data_post_change_password.send(
                     sender=self.__class__,
                     pwd_data=pwdtk_data
                 )
-
         return pwdtk_data
 
     def get_help_text(self):
@@ -182,3 +175,77 @@ class RegexPasswordValidator:
         return self.pattern_info if self.pattern_info else _(
             "Your password must match the required pattern."
         )
+
+
+class PasswordAgeValidator:
+    """
+    Validator responsible for updating password age metadata.
+    """
+    def __init__(self, max_age=None, error_messages=None):
+        """Initialize validator with max password age.
+
+        Args:
+            max_age (int, optional): Max age in seconds.
+                Defaults to PWDTK_PASSWD_AGE from settings.
+            error_messages (dict, optional): Custom error messages.
+                Supported keys: 'password_expired' (currently unused in validate)
+        """
+        self.max_age = (
+            max_age if max_age is not None
+            else PwdtkSettings.PWDTK_PASSWD_AGE
+        )
+        self.error_messages = {
+            'password_expired': _(
+                "Your password has expired and must be changed."
+            ),
+        }
+        if error_messages:
+            self.error_messages.update(error_messages)
+
+    def validate(self, password, user=None):
+        pass
+
+    def password_changed(self, password, user=None):
+        """Update password age metadata after a successful change.
+
+        Args:
+            password (str): New password (unused).
+            user (User, optional): User whose password changed.
+
+        Note:
+            Should only be called after new password is successfully set.
+            Updates:
+            - last_change_time (sets to current time)
+            - must_renew (sets to False)
+
+        Returns:
+            PwdData: The updated user password data object (or None)
+        """
+        if not user:
+            return None
+
+        if not hasattr(user, 'pwdtk_data'):
+            pwdtk_data = PwdData.get_or_create_for_user(user)
+        else:
+            pwdtk_data = user.pwdtk_data
+
+        now = timezone.now()
+
+        with transaction.atomic():
+            pwdtk_data.refresh_from_db(fields=['last_change_time', 'must_renew'])
+            pwdtk_data.last_change_time = now.isoformat()
+            pwdtk_data.must_renew = False
+            pwdtk_data.save(update_fields=['last_change_time', 'must_renew'])
+
+        return pwdtk_data
+
+    def get_help_text(self):
+        """Return help text for password age requirements.
+        """
+        days = self.max_age // (24 * 60 * 60) if self.max_age else 0
+        if days > 0:
+            return _(
+                "Your password must be changed at least every %(days)d days."
+            ) % {'days': days}
+        else:
+            return _("Your password may be subject to periodic renewal requirements.")
