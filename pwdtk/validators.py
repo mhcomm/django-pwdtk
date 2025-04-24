@@ -188,22 +188,35 @@ class PasswordAgeValidator:
             max_age (int, optional): Max age in seconds.
                 Defaults to PWDTK_PASSWD_AGE from settings.
             error_messages (dict, optional): Custom error messages.
-                Supported keys: 'password_expired' (currently unused in validate)
+                Supported keys: 'password_not_changed'
         """
         self.max_age = (
             max_age if max_age is not None
             else PwdtkSettings.PWDTK_PASSWD_AGE
         )
         self.error_messages = {
-            'password_expired': _(
-                "Your password has expired and must be changed."
+            'password_not_changed': _(
+                "Your new password cannot be the same as your current password"
             ),
         }
         if error_messages:
             self.error_messages.update(error_messages)
 
     def validate(self, password, user=None):
-        pass
+        """Check if password actually changed.
+
+        Args:
+            password (str): Password to validate.
+            user (User, optional): User object.
+
+        Raises:
+            ValidationError: If the password was not modified.
+        """
+        if user and user.check_password(password):
+            raise ValidationError(
+                self.error_messages['password_not_changed'],
+                code='password_not_changed',
+            )
 
     def password_changed(self, password, user=None):
         """Update password age metadata after a successful change.
@@ -242,10 +255,4 @@ class PasswordAgeValidator:
     def get_help_text(self):
         """Return help text for password age requirements.
         """
-        days = self.max_age // (24 * 60 * 60) if self.max_age else 0
-        if days > 0:
-            return _(
-                "Your password must be changed at least every %(days)d days."
-            ) % {'days': days}
-        else:
-            return _("Your password may be subject to periodic renewal requirements.")
+        return _("Your new password cannot be the same as your current password.")

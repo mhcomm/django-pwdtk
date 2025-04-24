@@ -2,10 +2,12 @@ from __future__ import absolute_import
 
 import django
 from django.conf import settings
+from django.contrib.auth.password_validation import get_default_password_validators
 from django.db import models
 from django.utils import timezone
 
 from pwdtk.helpers import PwdtkSettings
+from pwdtk.validators import PasswordAgeValidator
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
@@ -93,8 +95,15 @@ class PwdData(models.Model):
             return False
         if PwdtkSettings.PWDTK_PASSWD_AGE == 0:
             return False
+        age_validators = [validator for validator in get_default_password_validators()
+                          if isinstance(validator, PasswordAgeValidator)]
+        if len(age_validators) == 0:
+            return False
+        password_max_age = min(age_validators, key=lambda v: v.max_age)
+        if password_max_age == 0:
+            return False
         return ((timezone.now() - self.last_change_time).total_seconds() >
-                PwdtkSettings.PWDTK_PASSWD_AGE)
+                password_max_age)
 
     def get_lockout_context(self):
         return {

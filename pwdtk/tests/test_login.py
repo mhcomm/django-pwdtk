@@ -10,8 +10,12 @@ import pytest
 
 from builtins import range
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import password_changed
+from django.contrib.auth.password_validation import validate_password
 from django.contrib import auth
+from django.core.exceptions import ValidationError
 from django.test import Client
+from django.test import override_settings
 from django.utils import timezone
 
 from pwdtk.tests.fixtures import two_users  # noqa: F401
@@ -157,6 +161,12 @@ def test_login(two_users):  # noqa: F811
     logger.debug("AGE %i", pwdtk_data.fail_age)
 
 
+@override_settings(
+    AUTH_PASSWORD_VALIDATORS=[{
+            'NAME': 'pwdtk.validators.PasswordAgeValidator',
+    }],
+    PWDTK_PASSWD_AGE=30
+)
 @pytest.mark.django_db
 def test_pwd_expire(two_users):  # noqa: F811
     """ test whether a password renewal is demanded if a password
@@ -179,8 +189,11 @@ def test_pwd_expire(two_users):  # noqa: F811
     # prepare post_data
 
     password += '1'
+
+    validate_password(password, user)
     user.set_password(password)
     user.save()
+    password_changed(password, user)
 
     data = dict(
         username=username,
@@ -207,10 +220,16 @@ def test_pwd_expire(two_users):  # noqa: F811
     user = User.objects.get(username=username)
     assert user.pwdtk_data.must_renew
 
+    with pytest.raises(ValidationError):
+        validate_password(password, user)
+        user.set_password(password)
+        user.save()
+        password_changed(password, user)
+        assert user.pwdtk_data.must_renew
+
+    password += "2"
+    validate_password(password, user)
     user.set_password(password)
     user.save()
-    assert user.pwdtk_data.must_renew
-
-    user.set_password(password+"2")
-    user.save()
+    password_changed(password, user)
     assert not user.pwdtk_data.must_renew
