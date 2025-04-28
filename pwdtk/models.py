@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import django
 from django.conf import settings
+from django.contrib.auth.password_validation import get_default_password_validators
 from django.db import models
 from django.utils import timezone
 
@@ -89,12 +90,20 @@ class PwdData(models.Model):
     def compute_must_renew(self):
         """ determines whether a user must renew his password
         """
+        from pwdtk.validators import PasswordAgeValidator
         if getattr(self.user, "disable_must_renew", False):
             return False
         if PwdtkSettings.PWDTK_PASSWD_AGE == 0:
             return False
+        max_ages = [validator.max_age for validator in get_default_password_validators()
+                    if isinstance(validator, PasswordAgeValidator)]
+        if len(max_ages) == 0:
+            return False
+        password_max_age = min(max_ages)
+        if password_max_age == 0:
+            return False
         return ((timezone.now() - self.last_change_time).total_seconds() >
-                PwdtkSettings.PWDTK_PASSWD_AGE)
+                password_max_age)
 
     def get_lockout_context(self):
         return {

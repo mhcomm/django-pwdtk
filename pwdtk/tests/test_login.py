@@ -10,8 +10,12 @@ import pytest
 
 from builtins import range
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import password_changed
+from django.contrib.auth.password_validation import validate_password
 from django.contrib import auth
+from django.core.exceptions import ValidationError
 from django.test import Client
+from django.test import override_settings
 from django.utils import timezone
 
 from pwdtk.tests.fixtures import two_users  # noqa: F401
@@ -22,6 +26,14 @@ logger = logging.getLogger(__name__)
 
 AUTH_URL = PwdtkSettings.PWDTK_TEST_ADMIN_URL
 User = get_user_model()
+
+
+def change_password(user, password):
+    """Change the password using the password validators pipeline"""
+    validate_password(password, user)
+    user.set_password(password)
+    user.save()
+    password_changed(password, user)
 
 
 def do_login(client, data, use_good_password=True, shall_pass=None):
@@ -157,6 +169,12 @@ def test_login(two_users):  # noqa: F811
     logger.debug("AGE %i", pwdtk_data.fail_age)
 
 
+@override_settings(
+    AUTH_PASSWORD_VALIDATORS=[{
+            'NAME': 'pwdtk.validators.PasswordAgeValidator',
+    }],
+    PWDTK_PASSWD_AGE=30
+)
 @pytest.mark.django_db
 def test_pwd_expire(two_users):  # noqa: F811
     """ test whether a password renewal is demanded if a password
@@ -179,8 +197,8 @@ def test_pwd_expire(two_users):  # noqa: F811
     # prepare post_data
 
     password += '1'
-    user.set_password(password)
-    user.save()
+
+    change_password(user, password)
 
     data = dict(
         username=username,
@@ -207,10 +225,11 @@ def test_pwd_expire(two_users):  # noqa: F811
     user = User.objects.get(username=username)
     assert user.pwdtk_data.must_renew
 
-    user.set_password(password)
-    user.save()
+    # Make sure we cannot "renew" the password with the exact same password.
+    with pytest.raises(ValidationError):
+        change_password(user, password)
     assert user.pwdtk_data.must_renew
 
-    user.set_password(password+"2")
-    user.save()
+    password += "2"
+    change_password(user, password)
     assert not user.pwdtk_data.must_renew
