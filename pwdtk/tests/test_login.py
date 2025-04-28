@@ -222,10 +222,14 @@ def test_pwd_expire(two_users):  # noqa: F811
 
     with pytest.raises(ValidationError):
         validate_password(password, user)
+        # validate_password should raise the ValidationError,
+        # so the following is dead code.
+        # We keep it to make sure, even for future changes, must_renew
+        # remains True if we attempt to reuse the exact same password.
         user.set_password(password)
         user.save()
         password_changed(password, user)
-        assert user.pwdtk_data.must_renew
+    assert user.pwdtk_data.must_renew
 
     password += "2"
     validate_password(password, user)
