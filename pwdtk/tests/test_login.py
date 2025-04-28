@@ -28,6 +28,14 @@ AUTH_URL = PwdtkSettings.PWDTK_TEST_ADMIN_URL
 User = get_user_model()
 
 
+def change_password(user, password):
+    """Change the password using the password validators pipeline"""
+    validate_password(password, user)
+    user.set_password(password)
+    user.save()
+    password_changed(password, user)
+
+
 def do_login(client, data, use_good_password=True, shall_pass=None):
     """ helper to simulate logins via the admin login form.
         Logins with good or bad password can be simulated.
@@ -190,10 +198,7 @@ def test_pwd_expire(two_users):  # noqa: F811
 
     password += '1'
 
-    validate_password(password, user)
-    user.set_password(password)
-    user.save()
-    password_changed(password, user)
+    change_password(user, password)
 
     data = dict(
         username=username,
@@ -220,20 +225,11 @@ def test_pwd_expire(two_users):  # noqa: F811
     user = User.objects.get(username=username)
     assert user.pwdtk_data.must_renew
 
+    # Make sure we cannot "renew" the password with the exact same password.
     with pytest.raises(ValidationError):
-        validate_password(password, user)
-        # validate_password should raise the ValidationError,
-        # so the following is dead code.
-        # We keep it to make sure, even for future changes, must_renew
-        # remains True if we attempt to reuse the exact same password.
-        user.set_password(password)
-        user.save()
-        password_changed(password, user)
+        change_password(user, password)
     assert user.pwdtk_data.must_renew
 
     password += "2"
-    validate_password(password, user)
-    user.set_password(password)
-    user.save()
-    password_changed(password, user)
+    change_password(user, password)
     assert not user.pwdtk_data.must_renew
