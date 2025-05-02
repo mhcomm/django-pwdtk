@@ -45,6 +45,9 @@ PWDTK_LOCKOUT_TIME = 60
 # Amount of bad passwords before a user is locked out
 PWDTK_USER_FAILURE_LIMIT = 3
 
+# Multiplier for lockout time after each consecutive lockout
+PWDTK_LOCKOUT_MULTIPLIER = 2
+
 # the field in the login form, that contains the user name
 PWDTK_USERNAME_FORM_FIELD = 'username'
 
