@@ -63,8 +63,11 @@ class PwdData(models.Model):
         """Calculate the current lockout time based on the lockout count."""
         lockout_multiplier = getattr(PwdtkSettings, 'PWDTK_LOCKOUT_MULTIPLIER', 1)
         current_lockout_time = PwdtkSettings.PWDTK_LOCKOUT_TIME
+        max_lockout_time = PwdtkSettings.PWDTK_MAX_LOCKOUT_TIME
         if self.lockout_count > 0:
             current_lockout_time = PwdtkSettings.PWDTK_LOCKOUT_TIME * (lockout_multiplier ** (self.lockout_count - 1))
+            if max_lockout_time > 0:
+                current_lockout_time = min(current_lockout_time, max_lockout_time)
         return current_lockout_time
 
     def is_locked(self):

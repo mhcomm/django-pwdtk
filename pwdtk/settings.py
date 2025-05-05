@@ -48,6 +48,9 @@ PWDTK_USER_FAILURE_LIMIT = 3
 # Multiplier for lockout time after each consecutive lockout
 PWDTK_LOCKOUT_MULTIPLIER = 2
 
+# Maximal lockout time (0 for no limit)
+PWDTK_MAX_LOCKOUT_TIME = 24 * 60 * 60
+
 # the field in the login form, that contains the user name
 PWDTK_USERNAME_FORM_FIELD = 'username'
 
