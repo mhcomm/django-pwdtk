@@ -2,6 +2,8 @@
 
 from django.db import migrations, models
 
+from pwdtk.models import json_field
+
 
 class Migration(migrations.Migration):
 
@@ -13,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='pwddata',
             name='password_history',
-            field=models.JSONField(default=list),
+            field=json_field(default=list),
         ),
     ]
