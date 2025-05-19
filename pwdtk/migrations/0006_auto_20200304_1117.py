@@ -5,10 +5,11 @@ from django.db import migrations
 
 
 def fill_pwd_data(apps, schema_editor):
+    db = schema_editor.connection.alias
 
     PwdData = apps.get_model("pwdtk", "pwddata")
-    PwdData.objects.filter(old_user_id=None).delete()
-    for pwd_data in PwdData.objects.all():
+    PwdData.objects.using(db).filter(old_user_id=None).delete()
+    for pwd_data in PwdData.objects.using(db).all():
         pwd_data.user_id = pwd_data.old_user_id
         pwd_data.locked = pwd_data.data.get("locked", False)
         pwd_data.failed_logins = pwd_data.data.get("failed_logins", 0)
