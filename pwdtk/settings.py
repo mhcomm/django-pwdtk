@@ -45,6 +45,9 @@ PWDTK_LOCKOUT_TIME = 60
 # Amount of bad passwords before a user is locked out
 PWDTK_USER_FAILURE_LIMIT = 3
 
+# Multiplier for lockout time after each consecutive lockout
+PWDTK_LOCKOUT_MULTIPLIER = 2
+
 # the field in the login form, that contains the user name
 PWDTK_USERNAME_FORM_FIELD = 'username'
 
@@ -59,12 +62,21 @@ PWDTK_IP_FAILURE_LIMIT = 0
 # should ckeck code of https://github.com/tarak/django-password-policies to
 # see, that we use a similiar config.
 
+# whether the password must be changed on first login
+PWDTK_RENEW_ON_FIRST_LOGIN = False
+
 # age of passwords before it has to be renewed
 PWDTK_PASSWD_AGE = 30 * 24 * 60 * 60
 
 
 # amount of passwords before and old password can be reused
 PWDTK_PASSWD_HISTORY_LEN = 3
+
+# Regular expression pattern that passwords must match
+PWDTK_PASSWORD_ALLOWED_PATTERN = ""
+
+# Human-readable explanation of the pattern for user feedback
+PWDTK_PASSWORD_DEFAULT_PATTERN_INFO = ""
 
 # template to display for password renewal
 PWDTK_PASSWD_CHANGE_VIEW = "password_change"
@@ -87,3 +99,16 @@ PWDTK_TEST_LOGIN_FAIL_SUBMSG = b'Please enter the correct'
 
 # message to be found in contents to detect a locked out user
 PWDTK_TEST_LOCKOUT_SUBMSG = b'So bad!'
+
+# Password validation settings
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'pwdtk.validators.PasswordHistoryValidator',
+    },
+    {
+        'NAME': 'pwdtk.validators.RegexPasswordValidator',
+    },
+    {
+        'NAME': 'pwdtk.validators.PasswordAgeValidator',
+    },
+]

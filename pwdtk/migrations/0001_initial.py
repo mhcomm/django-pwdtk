@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-from django_jsonfield_backport.models import JSONField
+from pwdtk.models import json_field
 
 
 class Migration(migrations.Migration):
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                     default=0, null=True, blank=True)),
                 ('username', models.CharField(
                     default=b'', max_length=80, null=True, blank=True)),
-                ('data', JSONField(default={})),
+                ('data', json_field(default={})),
             ],
         ),
     ]
