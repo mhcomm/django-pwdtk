@@ -36,7 +36,7 @@ class PwdData(models.Model):
     fail_time = models.DateTimeField(null=True)
     must_renew = models.BooleanField(default=False)
     last_change_time = models.DateTimeField(default=timezone.now)
-    password_history = json_field(default=[])
+    password_history = json_field(default=list)
     locked_until = models.DateTimeField(null=True)
 
     @classmethod
