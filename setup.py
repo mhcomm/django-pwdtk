@@ -23,7 +23,7 @@ It spans a rather wide range of python and django versions and supports:
 
 setup(
     name="django-pwdtk",
-    version="1.1.0",
+    version="1.1.1",
     description="package to tune django password authentification",
     # long_description=long_description,
     # long_description_content_type="text/x-rst",
