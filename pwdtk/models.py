@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import sys
+
 import django
 from django.conf import settings
 from django.contrib.auth.password_validation import get_default_password_validators
@@ -88,7 +90,7 @@ class PwdData(models.Model):
         if timezone.is_aware(self.fail_time):
             return self.fail_time
         else:
-            if django.VERSION < (4, 0):
+            if django.VERSION < (4, 0) or sys.version_info < (3, 9):
                 import pytz
                 return pytz.timezone(
                     PwdtkSettings.TIME_ZONE).localize(self.fail_time)
