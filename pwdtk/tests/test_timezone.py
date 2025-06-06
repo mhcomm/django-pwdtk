@@ -1,14 +1,9 @@
 #!/usr/bin/env python
 
 # ############################################################################
-# Copyright  : (C) 2025 by MHComm. All rights reserved
-#
 # Name       : pwdtk.tests.test_timezone
 """
   Summary    : Test timezone related functions
-
-__author__ = "Jonathan Lajus"
-__email__ = "info@mhcomm.fr"
 """
 # #############################################################################
 
