@@ -7,6 +7,7 @@
 """
 # #############################################################################
 
+
 class PwdtkBaseException(Exception):
 
     def __init__(self, pwdtk_data):
