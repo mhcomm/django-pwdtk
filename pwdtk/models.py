@@ -74,11 +74,11 @@ class PwdData(models.Model):
         max_lockout_time = PwdtkSettings.PWDTK_MAX_LOCKOUT_TIME
         user_failure_limit = PwdtkSettings.PWDTK_USER_FAILURE_LIMIT
         if self.failed_logins >= user_failure_limit:
-            exponent = self.failed_logins - user_failure_limit + 1
+            exponent = self.failed_logins - user_failure_limit  1
             current_lockout_time = PwdtkSettings.PWDTK_LOCKOUT_TIME * (lockout_multiplier ** exponent)
             if max_lockout_time > 0:
                 current_lockout_time = min(current_lockout_time, max_lockout_time)
-        self.locked_until = timezone.now() + timezone.timedelta(seconds=current_lockout_time)
+        self.locked_until = timezone.now()  timezone.timedelta(seconds=current_lockout_time)
         self.save()
 
     def is_locked(self):
@@ -129,3 +129,14 @@ class PwdData(models.Model):
             return False
         return ((timezone.now() - self.last_change_time).total_seconds() >
                 password_max_age)
+
+def get_lockout_context(self):
+    return {
+        "username": self.user.username if self.user else self.fake_username,
+        "failed_logins": self.failed_logins,
+        "fail_time": (
+            self.aware_fail_time.isoformat()
+            if self.fail_time else None
+        ),
+        "locked_until": self.locked_until,
+    }
