@@ -130,13 +130,13 @@ class PwdData(models.Model):
         return ((timezone.now() - self.last_change_time).total_seconds() >
                 password_max_age)
 
-def get_lockout_context(self):
-    return {
-        "username": self.user.username if self.user else self.fake_username,
-        "failed_logins": self.failed_logins,
-        "fail_time": (
-            self.aware_fail_time.isoformat()
-            if self.fail_time else None
-        ),
-        "locked_until": self.locked_until,
-    }
+    def get_lockout_context(self):
+        return {
+            "username": self.user.username if self.user else self.fake_username,
+            "failed_logins": self.failed_logins,
+            "fail_time": (
+                self.aware_fail_time.isoformat()
+                if self.fail_time else None
+            ),
+            "locked_until": self.locked_until,
+        }
