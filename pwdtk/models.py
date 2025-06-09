@@ -60,7 +60,7 @@ class PwdData(models.Model):
         user_failure_limit = PwdtkSettings.PWDTK_USER_FAILURE_LIMIT
         self.failed_logins += 1
         self.fail_time = timezone.now()
-        if user_failure_limit and self.failed_logins > user_failure_limit:
+        if user_failure_limit and self.failed_logins >= user_failure_limit:
             self.set_locked()
             raise PwdtkLockedException(self)
         else:
@@ -73,7 +73,7 @@ class PwdData(models.Model):
         current_lockout_time = PwdtkSettings.PWDTK_LOCKOUT_TIME
         max_lockout_time = PwdtkSettings.PWDTK_MAX_LOCKOUT_TIME
         user_failure_limit = PwdtkSettings.PWDTK_USER_FAILURE_LIMIT
-        if self.failed_logins > user_failure_limit:
+        if self.failed_logins >= user_failure_limit:
             exponent = self.failed_logins - user_failure_limit + 1
             current_lockout_time = PwdtkSettings.PWDTK_LOCKOUT_TIME * (lockout_multiplier ** exponent)
             if max_lockout_time > 0:
