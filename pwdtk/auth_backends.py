@@ -8,43 +8,18 @@ import logging
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 
+from pwdtk.exceptions import PwdtkForceRenewException
+from pwdtk.exceptions import PwdtkLockedException
 from pwdtk.helpers import PwdtkSettings
 from pwdtk.models import PwdData
 
 logger = logging.getLogger(__name__)
 
 
-class PwdtkBaseException(Exception):
-
-    def __init__(self, pwdtk_data):
-
-        self.pwdtk_data = pwdtk_data
-
-
-class PwdtkLockedException(PwdtkBaseException):
-    """ custom exception """
-
-
-class PwdtkForceRenewException(PwdtkBaseException):
-    """ custom exception """
-
-
 class PwdtkBackend(ModelBackend):
     """
     Authenticates against settings.AUTH_USER_MODEL.
     """
-    def compute_failed_login(self, pwdtk_data):
-        # we check if we need to raise the PWDTK_USER_FAILURE_LIMIT
-        # or increment login fail counter
-
-        if PwdtkSettings.PWDTK_USER_FAILURE_LIMIT is None:
-            return None
-        if pwdtk_data.failed_logins+1 >= PwdtkSettings.PWDTK_USER_FAILURE_LIMIT:
-            pwdtk_data.set_locked(pwdtk_data.failed_logins+1)
-            raise PwdtkLockedException(pwdtk_data)
-        else:
-            pwdtk_data.failed_logins += 1
-            pwdtk_data.save()
 
     def authenticate(self, request, username=None, password=None, **kwargs):
         if not PwdtkSettings.PWDTK_ENABLED:
@@ -69,8 +44,8 @@ class PwdtkBackend(ModelBackend):
                 if must_renew and not kwargs.get("ignore_must_renew"):
                     raise PwdtkForceRenewException(pwdtk_data)
                 return user
-
-            self.compute_failed_login(pwdtk_data)
+            else:
+                pwdtk_data.register_failed_login()
 
         except UserModel.DoesNotExist:
             # Run the default password hasher once to reduce the timing
@@ -80,4 +55,4 @@ class PwdtkBackend(ModelBackend):
                 fake_pwdtk = PwdData.objects.get_or_create(fake_username=username)[0]
                 if fake_pwdtk.is_locked():
                     raise PwdtkLockedException(fake_pwdtk)
-                self.compute_failed_login(fake_pwdtk)
+                fake_pwdtk.register_failed_login()
