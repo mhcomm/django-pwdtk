@@ -26,6 +26,22 @@ def json_field(**kwargs):
         return JSONField(**kwargs)
 
 
+def make_aware(time):
+    if time is None:
+        return None
+    if timezone.is_aware(time):
+        return time
+    else:
+        if django.VERSION < (4, 0) or sys.version_info < (3, 9):
+            import pytz
+            return pytz.timezone(
+                PwdtkSettings.TIME_ZONE).localize(time)
+        else:
+            from zoneinfo import ZoneInfo
+            return time.replace(
+                tzinfo=ZoneInfo(PwdtkSettings.TIME_ZONE))
+
+
 class PwdData(models.Model):
     """ a model in case no custom way is specified for storing related data
     """
@@ -96,17 +112,7 @@ class PwdData(models.Model):
 
     @property
     def aware_fail_time(self):
-        if timezone.is_aware(self.fail_time):
-            return self.fail_time
-        else:
-            if django.VERSION < (4, 0) or sys.version_info < (3, 9):
-                import pytz
-                return pytz.timezone(
-                    PwdtkSettings.TIME_ZONE).localize(self.fail_time)
-            else:
-                from zoneinfo import ZoneInfo
-                return self.fail_time.replace(
-                    tzinfo=ZoneInfo(PwdtkSettings.TIME_ZONE))
+        return make_aware(self.fail_time)
 
     @property
     def fail_age(self):
@@ -138,5 +144,5 @@ class PwdData(models.Model):
                 self.aware_fail_time.isoformat()
                 if self.fail_time else None
             ),
-            "locked_until": self.locked_until,
+            "locked_until": make_aware(self.locked_until).isoformat(),
         }
