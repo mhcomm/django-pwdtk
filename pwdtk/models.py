@@ -145,7 +145,7 @@ class PwdData(models.Model):
                 if self.fail_time else None
             ),
             "locked_until": (
-                make_tz_aware(self.locked_until).isoformat() 
+                make_tz_aware(self.locked_until).isoformat()
                 if self.locked_until else None
             ),
         }
