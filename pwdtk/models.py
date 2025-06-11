@@ -26,7 +26,7 @@ def json_field(**kwargs):
         return JSONField(**kwargs)
 
 
-def make_aware(time):
+def make_tz_aware(time):
     if time is None:
         return None
     if timezone.is_aware(time):
@@ -112,7 +112,7 @@ class PwdData(models.Model):
 
     @property
     def aware_fail_time(self):
-        return make_aware(self.fail_time)
+        return make_tz_aware(self.fail_time)
 
     @property
     def fail_age(self):
@@ -144,5 +144,5 @@ class PwdData(models.Model):
                 self.aware_fail_time.isoformat()
                 if self.fail_time else None
             ),
-            "locked_until": make_aware(self.locked_until).isoformat(),
+            "locked_until": make_tz_aware(self.locked_until).isoformat(),
         }
