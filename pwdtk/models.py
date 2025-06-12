@@ -8,6 +8,7 @@ from django.contrib.auth.password_validation import get_default_password_validat
 from django.db import models
 from django.utils import timezone
 
+from pwdtk.exceptions import PwdtkLockedException
 from pwdtk.helpers import PwdtkSettings
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -25,6 +26,22 @@ def json_field(**kwargs):
         return JSONField(**kwargs)
 
 
+def make_tz_aware(time):
+    if time is None:
+        return None
+    if timezone.is_aware(time):
+        return time
+    else:
+        if django.VERSION < (4, 0) or sys.version_info < (3, 9):
+            import pytz
+            return pytz.timezone(
+                PwdtkSettings.TIME_ZONE).localize(time)
+        else:
+            from zoneinfo import ZoneInfo
+            return time.replace(
+                tzinfo=ZoneInfo(PwdtkSettings.TIME_ZONE))
+
+
 class PwdData(models.Model):
     """ a model in case no custom way is specified for storing related data
     """
@@ -34,7 +51,6 @@ class PwdData(models.Model):
     fake_username = models.CharField(max_length=150, unique=True, null=True)
     locked = models.BooleanField(default=False)
     failed_logins = models.PositiveIntegerField(default=0)
-    lockout_count = models.PositiveIntegerField(default=0)
     fail_time = models.DateTimeField(null=True)
     must_renew = models.BooleanField(default=False)
     last_change_time = models.DateTimeField(default=timezone.now)
@@ -52,25 +68,34 @@ class PwdData(models.Model):
     def __str__(self):
         return ("%r, %r" % ((self.user.id, self.user.username) if self.user else ("-", self.fake_username)))
 
-    def set_locked(self, failed_logins=None):
-        if failed_logins is not None:
-            self.failed_logins = failed_logins
-        self.locked = True
-        self.fail_time = timezone.now()
-        self.lockout_count += 1
-        self.locked_until = timezone.now() + timezone.timedelta(seconds=self.calculate_current_lockout_time())
-        self.save()
+    def register_failed_login(self):
+        """Register a failed login.
 
-    def calculate_current_lockout_time(self):
-        """Calculate the current lockout time based on the lockout count."""
+        @raises PwdtkLockedException: the account is locked after the failed login.
+        """
+        user_failure_limit = PwdtkSettings.PWDTK_USER_FAILURE_LIMIT
+        self.failed_logins += 1
+        self.fail_time = timezone.now()
+        if user_failure_limit and self.failed_logins >= user_failure_limit:
+            self.set_locked()
+            raise PwdtkLockedException(self)
+        else:
+            self.save()
+
+    def set_locked(self):
+        """Lock an account for a certain time."""
+        self.locked = True
         lockout_multiplier = getattr(PwdtkSettings, 'PWDTK_LOCKOUT_MULTIPLIER', 1)
         current_lockout_time = PwdtkSettings.PWDTK_LOCKOUT_TIME
         max_lockout_time = PwdtkSettings.PWDTK_MAX_LOCKOUT_TIME
-        if self.lockout_count > 0:
-            current_lockout_time = PwdtkSettings.PWDTK_LOCKOUT_TIME * (lockout_multiplier ** (self.lockout_count - 1))
+        user_failure_limit = PwdtkSettings.PWDTK_USER_FAILURE_LIMIT
+        if self.failed_logins >= user_failure_limit:
+            exponent = self.failed_logins - user_failure_limit
+            current_lockout_time = PwdtkSettings.PWDTK_LOCKOUT_TIME * (lockout_multiplier ** exponent)
             if max_lockout_time > 0:
                 current_lockout_time = min(current_lockout_time, max_lockout_time)
-        return current_lockout_time
+        self.locked_until = timezone.now() + timezone.timedelta(seconds=current_lockout_time)
+        self.save()
 
     def is_locked(self):
         """ determines whether a user is still locked out
@@ -87,17 +112,7 @@ class PwdData(models.Model):
 
     @property
     def aware_fail_time(self):
-        if timezone.is_aware(self.fail_time):
-            return self.fail_time
-        else:
-            if django.VERSION < (4, 0) or sys.version_info < (3, 9):
-                import pytz
-                return pytz.timezone(
-                    PwdtkSettings.TIME_ZONE).localize(self.fail_time)
-            else:
-                from zoneinfo import ZoneInfo
-                return self.fail_time.replace(
-                    tzinfo=ZoneInfo(PwdtkSettings.TIME_ZONE))
+        return make_tz_aware(self.fail_time)
 
     @property
     def fail_age(self):
@@ -122,14 +137,15 @@ class PwdData(models.Model):
                 password_max_age)
 
     def get_lockout_context(self):
-        current_lockout_time = self.calculate_current_lockout_time()
         return {
             "username": self.user.username if self.user else self.fake_username,
-            "lockout_time": current_lockout_time,
             "failed_logins": self.failed_logins,
             "fail_time": (
-                        self.aware_fail_time.isoformat()
-                        if self.fail_time else None
-                    ),
-            "lockout_count": self.lockout_count,
+                self.aware_fail_time.isoformat()
+                if self.fail_time else None
+            ),
+            "locked_until": (
+                make_tz_aware(self.locked_until).isoformat()
+                if self.locked_until else None
+            ),
         }
