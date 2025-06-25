@@ -196,7 +196,7 @@ class PasswordAgeValidator:
         )
         self.error_messages = {
             'password_not_changed': _(
-                "Your new password cannot be the same as your current password"
+                "Your new password cannot be the same as your current password."
             ),
         }
         if error_messages:
