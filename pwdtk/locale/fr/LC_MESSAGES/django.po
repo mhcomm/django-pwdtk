@@ -1,0 +1,34 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 2.0.3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-06-25 09:33+0000\n"
+"PO-Revision-Date: 2025-06-25 09:26+0000\n"
+"Last-Translator: Jonathan Lajus <jonathan.lajus@mhcomm.fr>\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: validators.py:34 validators.py:110
+#, python-format
+msgid ""
+"Your password cannot be the same as any of your last %(history_length)d "
+"passwords."
+msgstr ""
+"Votre mot de passe ne peut pas être identique à l'un de vos "
+"%(history_length)d derniers mots de passe."
+
+#: validators.py:142
+#, python-format
+msgid "Password does not meet the required pattern. %(pattern_info)s"
+msgstr "Le mot de passe ne respecte pas le format requis. %(pattern_info)s"
+
+#: validators.py:176
+msgid "Your password must match the required pattern."
+msgstr "Votre mot de passe doit respecter le format requis."
+
+#: validators.py:199 validators.py:258
+msgid "Your new password cannot be the same as your current password."
+msgstr "Votre nouveau mot de passe ne doit pas être identique à l'ancien."
