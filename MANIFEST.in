@@ -1,3 +1,4 @@
 include README.md
 include pwdtk/templates/login/*
 include pwdtk/templates/test/*
+recursive-include pwdtk/locale *.mo *.po
