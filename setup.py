@@ -4,6 +4,7 @@ from __future__ import absolute_import
 # third party modules
 from setuptools import find_packages
 from setuptools import setup
+from pwdtk import __version__
 
 install_requires = [
     "django-jsonfield-backport",
@@ -23,7 +24,7 @@ It spans a rather wide range of python and django versions and supports:
 
 setup(
     name="django-pwdtk",
-    version="1.1.1",
+    version=__version__,
     description="package to tune django password authentification",
     # long_description=long_description,
     # long_description_content_type="text/x-rst",
