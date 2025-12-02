@@ -1,5 +1,9 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v2.0.2](https://github.com/mhcomm/django-pwdtk/compare/v2.0.0...v2.0.2)
+* refactor incremental lockout
+* add French translations
+* add pwdtk.__version__ and pwddtk.meta.version_info()
 ## [v2.0.0](https://github.com/mhcomm/django-pwdtk/compare/v1.1.0...v2.0.0)
 * Version bump to 2.0.0
 * Removed watchers
@@ -16,8 +20,14 @@
   - Introduces PWDTK_LOCKOUT_MULTIPLIER setting
   - Increases lockout time with each consecutive lockout when a user fails PWDTK_USER_FAILURE_LIMIT times
   - Enhances security by making repeated login attempts progressively more time-consuming
+## [v1.1.1](https://github.com/mhcomm/django-pwdtk/compare/v1.1.1...v1.1.2)
+* backport add pwdtk.__version__ and pwddtk.meta.version_info()
+* rm old python 2 specific code sections
+## [v1.1.0](https://github.com/mhcomm/django-pwdtk/compare/v1.1.0...v1.1.1)
 ## [v1.1.0](https://github.com/mhcomm/django-pwdtk/compare/v1.0.0...v1.1.0)
 * add support for django 4.2
+## [v1.0.1](https://github.com/mhcomm/django-pwdtk/compare/v1.0.0...v1.0.1)
+* backport add pwdtk.__version__ and pwddtk.meta.version_info()
 ## [v1.0.0](https://github.com/mhcomm/django-pwdtk/compare/v0.4.0...v1.0.0)
 * break django 1.11 compatibility
 * break python < 3.7 compatibility
