@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-from __future__ import print_function
-
 import django
 print(django.VERSION)
 if django.VERSION < (2, ):
