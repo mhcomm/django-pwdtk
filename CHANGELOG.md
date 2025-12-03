@@ -1,7 +1,12 @@
 # [Changelog](https://github.com/mhcomm/django-pwdtk/releases)
 
+## [v1.1.1](https://github.com/mhcomm/django-pwdtk/compare/v1.1.1...v1.1.2)
+* backport add pwdtk.__version__ and pwddtk.meta.version_info()
+## [v1.1.0](https://github.com/mhcomm/django-pwdtk/compare/v1.1.0...v1.1.1)
 ## [v1.1.0](https://github.com/mhcomm/django-pwdtk/compare/v1.0.0...v1.1.0)
 * add support for django 4.2
+## [v1.0.1](https://github.com/mhcomm/django-pwdtk/compare/v1.0.0...v1.0.1)
+* backport add pwdtk.__version__ and pwddtk.meta.version_info()
 ## [v1.0.0](https://github.com/mhcomm/django-pwdtk/compare/v0.4.0...v1.0.0)
 * break django 1.11 compatibility
 * break python < 3.7 compatibility
