@@ -118,14 +118,21 @@ class PwdData(models.Model):
     def fail_age(self):
         return int((timezone.now() - self.fail_time).total_seconds())
 
+    def force_renew(self):
+        """
+        Manually force the renew of password on next login.
+        """
+        self.must_renew = True
+        self.save()
+
     def compute_must_renew(self):
         """ determines whether a user must renew his password
         """
         from pwdtk.validators import PasswordAgeValidator
         if getattr(self.user, "disable_must_renew", False):
             return False
-        if PwdtkSettings.PWDTK_PASSWD_AGE == 0:
-            return False
+        if self.must_renew:
+            return True
         max_ages = [validator.max_age for validator in get_default_password_validators()
                     if isinstance(validator, PasswordAgeValidator)]
         if len(max_ages) == 0:
