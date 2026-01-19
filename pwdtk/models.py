@@ -60,6 +60,8 @@ class PwdData(models.Model):
         if not hasattr(user, 'pwdtk_data'):
             user.pwdtk_data = cls.objects.create(user=user)
             cls.objects.filter(fake_username=user.username).delete()
+            if PwdtkSettings.PWDTK_FORCE_RENEW_ON_FIRST_LOGIN:
+                user.pwdtk_data.force_renew()
 
         return user.pwdtk_data
 
