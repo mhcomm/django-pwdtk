@@ -1,7 +1,6 @@
 import logging
 
 from django.apps import AppConfig
-from pwdtk.helpers import PwdtkSettings
 
 logger = logging.getLogger(__name__)
 

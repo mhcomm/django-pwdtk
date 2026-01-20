@@ -9,11 +9,9 @@ except: # noqa E722
     class MiddlewareMixin(object):
         pass
 
-
 from pwdtk.auth_backends import PwdtkForceRenewException
 from pwdtk.auth_backends import PwdtkLockedException
 from pwdtk.helpers import PwdtkSettings
-
 
 logger = logging.getLogger(__name__)
 
