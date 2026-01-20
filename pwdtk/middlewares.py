@@ -1,8 +1,6 @@
 import json
 import logging
 
-
-from django.core.exceptions import MiddlewareNotUsed
 from django.http import HttpResponse
 
 try:
@@ -21,17 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 class PwdtkMiddleware(MiddlewareMixin):
-
-    def __init__(self, get_response=None):
-
-        if not PwdtkSettings.PWDTK_ENABLED:
-            logger.debug("PWDTK middleware is disabled")
-            raise MiddlewareNotUsed("pwdtk is disabled")
-        if get_response:
-            super(PwdtkMiddleware, self).__init__(
-                get_response=get_response)
-        else:
-            super(PwdtkMiddleware, self).__init__()
 
     def process_request(self, request):
         if hasattr(PwdtkSettings, "reset_cache"):

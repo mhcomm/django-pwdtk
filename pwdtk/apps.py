@@ -17,6 +17,3 @@ class PwdTkConfig(AppConfig):
             The required hooks depend on the django version.
         """
         logger.debug("PWDTK READY")
-        if not PwdtkSettings.PWDTK_ENABLED:
-            logger.debug("PWDTK DISABLED")
-            return
