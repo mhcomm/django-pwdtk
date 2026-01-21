@@ -19,10 +19,16 @@ logger = logging.getLogger(__name__)
 class PwdtkMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
+        # Will still be called even if PwdtkSettings.PWDTK_ENABLED is False.
+        # Only use safe code here or add a conditional on
+        # PwdtkSettings.PWDTK_ENABLED when necessary to keep the logic sound.
         if hasattr(PwdtkSettings, "reset_cache"):
             PwdtkSettings.reset_cache()
 
     def process_exception(self, request, exception):
+        # Will still be called even if PwdtkSettings.PWDTK_ENABLED is False.
+        # Only use safe code here or add a conditional on
+        # PwdtkSettings.PWDTK_ENABLED when necessary to keep the logic sound.
 
         if isinstance(exception, PwdtkLockedException):
             context = exception.pwdtk_data.get_lockout_context()

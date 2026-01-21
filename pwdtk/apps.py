@@ -4,8 +4,7 @@ from django.apps import AppConfig
 
 logger = logging.getLogger(__name__)
 
-
-logger.debug("imp pwdtk APPS")  # added trace for dbg of dj 1.8 -> dj 1.11
+logger.debug("imp pwdtk APPS")
 
 
 class PwdTkConfig(AppConfig):
