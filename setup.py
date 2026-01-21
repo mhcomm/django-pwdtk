@@ -1,13 +1,9 @@
-from __future__ import absolute_import
-
-
 # third party modules
 from setuptools import find_packages
 from setuptools import setup
 
 install_requires = [
     "django-jsonfield-backport",
-    "future",
     "minibelt",
     "python-dateutil",
     "pytz",
