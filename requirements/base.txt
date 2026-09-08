@@ -1,4 +1,4 @@
-minibelt<0.2.0
+minibelt
 python-dateutil
 pyyaml
 ua-parser
