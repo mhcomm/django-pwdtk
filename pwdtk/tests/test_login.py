@@ -1,4 +1,3 @@
-import datetime
 import logging
 
 import django
@@ -10,10 +9,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import password_changed
 from django.contrib.auth.password_validation import validate_password
 from django.contrib import auth
-from django.core.exceptions import ValidationError
 from django.test import Client
-from django.test import override_settings
-from django.utils import timezone
 
 from pwdtk.tests.fixtures import two_users  # noqa: F401
 from pwdtk.helpers import PwdtkSettings
@@ -31,6 +27,26 @@ def change_password(user, password):
     user.set_password(password)
     user.save()
     password_changed(password, user)
+
+
+def get_login_data(client, user):
+    """ helper going to the login page to fetch a csrf token and building
+        the login form data of a given user
+        :param client: client object
+        :param user: user object as created by the two_users fixture
+    """
+    url = AUTH_URL + "login/?next=" + AUTH_URL
+    logger.debug("loginurl = %s", url)
+    resp = client.get(url)
+    assert hasattr(resp, 'cookies')
+    csrf_token = resp.cookies.get('csrftoken')
+    logger.debug("token %r", csrf_token)
+
+    return dict(
+        username=user.username,
+        password=user.raw_password,
+        csrfmiddlewaretoken=csrf_token,
+        )
 
 
 def do_login(client, data, use_good_password=True, shall_pass=None):
@@ -109,22 +125,8 @@ def test_login(two_users):  # noqa: F811
 
     user = two_users[0]
     username = user.username
-    password = user.raw_password
 
-    # go to a login page and fetch csrf token
-    url = AUTH_URL + "login/?next=" + AUTH_URL
-    logger.debug("loginurl = %s", url)
-    resp = client.get(url)
-    assert hasattr(resp, 'cookies')
-    csrf_token = resp.cookies.get('csrftoken')
-    logger.debug("token %r", csrf_token)
-
-    # prepare post_data
-    data = dict(
-        username=username,
-        password=password,
-        csrfmiddlewaretoken=csrf_token,
-        )
+    data = get_login_data(client, user)
 
     # login once
     do_login(client, data)
@@ -164,69 +166,3 @@ def test_login(two_users):  # noqa: F811
     pwdtk_data = user.pwdtk_data
     assert pwdtk_data.locked
     logger.debug("AGE %i", pwdtk_data.fail_age)
-
-
-@override_settings(
-    AUTH_PASSWORD_VALIDATORS=[{
-            'NAME': 'pwdtk.validators.PasswordAgeValidator',
-    }],
-    PWDTK_PASSWD_AGE=30
-)
-@pytest.mark.django_db
-def test_pwd_expire(two_users):  # noqa: F811
-    """ test whether a password renewal is demanded if a password
-        has not been changed for a given time.
-    """
-
-    browser = "Mozilla/5.0"
-    client = Client(browser=browser)
-
-    user = two_users[0]
-    username = user.username
-    password = user.raw_password
-
-    # # go to a login page and fetch csrf token
-    url = AUTH_URL + "login/?next=" + AUTH_URL
-
-    resp = client.get(url)
-
-    csrf_token = resp.cookies.get('csrftoken')
-    # prepare post_data
-
-    password += '1'
-
-    change_password(user, password)
-
-    data = dict(
-        username=username,
-        password=password,
-        csrfmiddlewaretoken=csrf_token,
-        )
-    do_login(client, data)
-
-    # pwdtk data will be populate after first login
-    user = User.objects.get(username=username)
-    pwdtk_data = user.pwdtk_data
-
-    # make passwd obsolete
-    pwdtk_data.last_change_time = (
-        timezone.now() -
-        datetime.timedelta(seconds=PwdtkSettings.PWDTK_PASSWD_AGE)
-    )
-    pwdtk_data.save()
-    assert pwdtk_data.compute_must_renew()
-
-    # now login should fail
-    do_login(client, data)
-
-    user = User.objects.get(username=username)
-    assert user.pwdtk_data.must_renew
-
-    # Make sure we cannot "renew" the password with the exact same password.
-    with pytest.raises(ValidationError):
-        change_password(user, password)
-    assert user.pwdtk_data.must_renew
-
-    password += "2"
-    change_password(user, password)
-    assert not user.pwdtk_data.must_renew

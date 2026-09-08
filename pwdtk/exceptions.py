@@ -21,3 +21,7 @@ class PwdtkLockedException(PwdtkBaseException):
 
 class PwdtkForceRenewException(PwdtkBaseException):
     """ custom exception """
+
+
+class PwdtkConfigWarning(UserWarning):
+    """ warning raised when pwdtk is misconfigured """

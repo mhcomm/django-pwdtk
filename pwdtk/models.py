@@ -1,11 +1,12 @@
 import sys
+import warnings
 
 import django
 from django.conf import settings
-from django.contrib.auth.password_validation import get_default_password_validators
 from django.db import models
 from django.utils import timezone
 
+from pwdtk.exceptions import PwdtkConfigWarning
 from pwdtk.exceptions import PwdtkLockedException
 from pwdtk.helpers import PwdtkSettings
 
@@ -121,20 +122,34 @@ class PwdData(models.Model):
     def force_renew(self):
         """
         Manually force the renew of password on next login.
+
+        Note:
+            Warns when no PasswordAgeValidator is active, as it is the only
+            validator resetting must_renew. Integrators who reset must_renew
+            on their own can filter out PwdtkConfigWarning.
         """
+        from pwdtk.validators import get_password_age_validators
+        if not get_password_age_validators():
+            warnings.warn(
+                "pwdtk.validators.PasswordAgeValidator is missing from "
+                "AUTH_PASSWORD_VALIDATORS. Nothing will reset must_renew, "
+                "hence %s will not be able to log in anymore." % self,
+                PwdtkConfigWarning,
+                stacklevel=2,
+                )
         self.must_renew = True
         self.save()
 
     def compute_must_renew(self):
         """ determines whether a user must renew his password
         """
-        from pwdtk.validators import PasswordAgeValidator
+        from pwdtk.validators import get_password_age_validators
         if getattr(self.user, "disable_must_renew", False):
             return False
         if self.must_renew:
             return True
-        max_ages = [validator.max_age for validator in get_default_password_validators()
-                    if isinstance(validator, PasswordAgeValidator)]
+        max_ages = [validator.max_age
+                    for validator in get_password_age_validators()]
         if len(max_ages) == 0:
             return False
         password_max_age = min(max_ages)
