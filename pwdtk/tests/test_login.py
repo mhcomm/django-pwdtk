@@ -33,6 +33,26 @@ def change_password(user, password):
     password_changed(password, user)
 
 
+def get_login_data(client, user):
+    """ helper going to the login page to fetch a csrf token and building
+        the login form data of a given user
+        :param client: client object
+        :param user: user object as created by the two_users fixture
+    """
+    url = AUTH_URL + "login/?next=" + AUTH_URL
+    logger.debug("loginurl = %s", url)
+    resp = client.get(url)
+    assert hasattr(resp, 'cookies')
+    csrf_token = resp.cookies.get('csrftoken')
+    logger.debug("token %r", csrf_token)
+
+    return dict(
+        username=user.username,
+        password=user.raw_password,
+        csrfmiddlewaretoken=csrf_token,
+        )
+
+
 def do_login(client, data, use_good_password=True, shall_pass=None):
     """ helper to simulate logins via the admin login form.
         Logins with good or bad password can be simulated.
@@ -109,22 +129,8 @@ def test_login(two_users):  # noqa: F811
 
     user = two_users[0]
     username = user.username
-    password = user.raw_password
 
-    # go to a login page and fetch csrf token
-    url = AUTH_URL + "login/?next=" + AUTH_URL
-    logger.debug("loginurl = %s", url)
-    resp = client.get(url)
-    assert hasattr(resp, 'cookies')
-    csrf_token = resp.cookies.get('csrftoken')
-    logger.debug("token %r", csrf_token)
-
-    # prepare post_data
-    data = dict(
-        username=username,
-        password=password,
-        csrfmiddlewaretoken=csrf_token,
-        )
+    data = get_login_data(client, user)
 
     # login once
     do_login(client, data)
