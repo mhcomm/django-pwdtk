@@ -17,6 +17,60 @@ This package provides solutions for these problems.
 PWDTK is compatible with python 2.7, and >=3.5
 It is compatible with django 2.2, 3.2 and 4.2
 
+Account Lockout
+---------------
+
+PWDTK locks an account out for a while after too many logins with a bad
+password. Login attempts with a user name matching no user are counted and
+locked out the same way.
+
+.. code-block:: python
+
+    # In your settings.py
+
+    # Amount of logins with a bad password before a lockout (0 to disable)
+    PWDTK_USER_FAILURE_LIMIT = 3
+
+    # Duration of a first lockout, in seconds
+    PWDTK_LOCKOUT_TIME = 60
+
+    # Factor applied to the lockout time after each additional failed login
+    PWDTK_LOCKOUT_MULTIPLIER = 2
+
+    # Longest lockout, in seconds (0 for no limit)
+    PWDTK_MAX_LOCKOUT_TIME = 24 * 60 * 60
+
+With this configuration:
+
+- The third login with a bad password locks the account for 60 seconds
+- Each further login with a bad password multiplies the duration of the next
+  lockout by 2 (120 seconds, 240 seconds, ...) up to one day
+- A locked out user is refused, even when he finally uses his right password
+- The failed logins are only forgotten by a successful login, hence a user
+  who keeps failing right after each lockout is locked out longer and longer
+
+A refused login raises a ``pwdtk.exceptions.PwdtkLockedException``, which
+``pwdtk.middlewares.PwdtkMiddleware`` turns into a 403 response describing
+the lockout:
+
+.. code-block:: json
+
+    {
+        "status": "PWDTK_LOCKED",
+        "username": "jdoe",
+        "failed_logins": 3,
+        "fail_time": "2024-01-01T10:00:00+00:00",
+        "locked_until": "2024-01-01T10:01:00+00:00"
+    }
+
+An integrating tool can lift a lockout before its expiry:
+
+.. code-block:: python
+
+    from pwdtk.models import PwdData
+
+    PwdData.get_or_create_for_user(user).unlock()
+
 Password Pattern Validation
 --------------------------
 
