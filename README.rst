@@ -1,8 +1,8 @@
 PWDTK Password Tool Kit for Django
 ====================================
 
-.. image:: https://api.travis-ci.com/mhcomm/django-pwdtk.svg?branch=master
-    :target: https://travis-ci.com/mhcomm/django-pwdtk
+.. image:: https://github.com/mhcomm/django-pwdtk/actions/workflows/build.yml/badge.svg?branch=master
+    :target: https://github.com/mhcomm/django-pwdtk/actions/workflows/build.yml
 
 .. image:: https://raw.githubusercontent.com/mhcomm/django-pwdtk/python-coverage-comment-action-data/badge.svg
     :target: https://htmlpreview.github.io/?https://github.com/mhcomm/django-pwdtk/blob/python-coverage-comment-action-data/htmlcov/index.html
