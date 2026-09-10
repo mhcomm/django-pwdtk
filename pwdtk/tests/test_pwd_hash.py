@@ -19,14 +19,9 @@ def test_pwd_nodflt_hash(two_users):  # noqa: F811
     print("user %s with %r" % (user, password))
     hashers = settings.PASSWORD_HASHERS
     print("hashers:\n%s" % "\n".join(str(hasher) for hasher in hashers))
-    salt = ""
-    if "django.contrib.auth.hashers.UnsaltedMD5PasswordHasher" in hashers:
-        hasher_cls_name = ("django.contrib.auth.hashers"
-                           ".UnsaltedMD5PasswordHasher")
-    else:
-        hasher_cls_name = hashers[-1]
-        if hasher_cls_name.endswith("CryptPasswordHasher"):
-            salt = "ab"
+    # each test project appends a cheap hasher, which is therefore not the
+    # default one django hashes the passwords with
+    hasher_cls_name = hashers[-1]
 
     assert hasher_cls_name != hashers[0]
     hasher_modname, hasher_name = hasher_cls_name.rsplit(".", 1)
@@ -34,7 +29,8 @@ def test_pwd_nodflt_hash(two_users):  # noqa: F811
     print("try to import %s:%s" % (hasher_modname, hasher_name))
     hasher = getattr(hasher_mod, hasher_name)()
     print("hasher = ", hasher)
-    passwd_hash = hasher.encode(password, salt)
+    # an unsalted hasher has an empty salt, a crypt one only two characters
+    passwd_hash = hasher.encode(password, hasher.salt())
     print("passwd: %s -> %r" % (password, passwd_hash))
 
     user.password = passwd_hash
