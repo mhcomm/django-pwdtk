@@ -48,6 +48,64 @@ The example above requires passwords to:
 - Be at least 8 characters long
 - Contain at least one letter and one number
 
+Forced Password Renewal
+--------------------------
+
+PWDTK can demand the renewal of the password of a user. Such a user cannot log
+in anymore: the authentication backend raises a ``PwdtkForceRenewException``,
+which the PWDTK middleware turns into a 403 response holding
+``{"status": "PWDTK_NEED_RENEW_PASSWORD"}``. It is up to the integrating tool
+to lead the user to a password change form.
+
+Three modes demand a renewal. They are independent and can be combined:
+
+**1. The password is too old.** The PasswordAgeValidator demands a renewal
+once the password is older than its ``max_age``, in seconds, which defaults to
+the ``PWDTK_PASSWD_AGE`` setting (30 days). Beware that this mode is disabled
+when ``max_age`` is 0, the validator keeping all its other effects. When
+several PasswordAgeValidator are active, the smallest ``max_age`` wins, hence
+a single one set to 0 disables the mode altogether.
+
+**2. The user logs in for the first time.** With
+``PWDTK_FORCE_RENEW_ON_FIRST_LOGIN`` every new user has to renew his password
+at his very first login attempt.
+
+**3. The integrating tool demands it.** ``PwdData.force_renew()`` demands the
+renewal of the password of a given user at his next login.
+
+The modes 2 and 3 set the ``must_renew`` flag of the pwdtk data of the user.
+The mode 1 is evaluated at each login attempt and its result is stored in that
+same flag. Whatever the mode, a truthy ``disable_must_renew`` attribute on the
+user object exempts him from any renewal.
+
+All three modes need an active PasswordAgeValidator, as its
+``password_changed`` hook is the only one resetting ``must_renew`` and
+refreshing the age of the password. Without it a user demanded to renew his
+password would never be able to log in again. Note that the validator is
+needed for its reset even when ``max_age`` is 0, which is how a renewal is
+demanded on the first login without expiring the passwords afterwards:
+
+.. code-block:: python
+
+    # In your settings.py
+
+    # Demand a renewal at the first login of every new user
+    PWDTK_FORCE_RENEW_ON_FIRST_LOGIN = True
+
+    # Do not demand any renewal because of the age of the passwords
+    PWDTK_PASSWD_AGE = 0
+
+    AUTH_PASSWORD_VALIDATORS = [
+        {
+            # still required to reset must_renew on a password change
+            'NAME': 'pwdtk.validators.PasswordAgeValidator',
+        },
+    ]
+
+A missing PasswordAgeValidator is reported by the ``pwdtk.W001`` system check
+when ``PWDTK_FORCE_RENEW_ON_FIRST_LOGIN`` is enabled, and by a
+``PwdtkConfigWarning`` when ``force_renew()`` is called.
+
 Password History Validation
 --------------------------
 

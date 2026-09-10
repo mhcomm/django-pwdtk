@@ -1,3 +1,4 @@
+from django.contrib.auth.password_validation import get_default_password_validators
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from django.utils import timezone
@@ -256,3 +257,19 @@ class PasswordAgeValidator:
         """Return help text for password age requirements.
         """
         return _("Your new password cannot be the same as your current password.")
+
+
+def get_password_age_validators():
+    """Return the PasswordAgeValidator instances of AUTH_PASSWORD_VALIDATORS.
+
+    Note:
+        This validator is the only one resetting must_renew, hence an empty
+        result means that no forced password renewal can ever be lifted.
+
+    Returns:
+        list: the active PasswordAgeValidator instances
+    """
+    return [
+        validator for validator in get_default_password_validators()
+        if isinstance(validator, PasswordAgeValidator)
+    ]
