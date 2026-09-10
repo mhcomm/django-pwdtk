@@ -6,7 +6,11 @@ elif django.VERSION < (2, 2):
     from pwdtk.testproject.dj21.settings import *  # noqa: F401, F403
 elif django.VERSION < (3, 1):
     from pwdtk.testproject.dj22.settings import *  # noqa: F401, F403
-elif django.VERSION < (4, 2):
+elif django.VERSION < (3, 2):
     from pwdtk.testproject.dj31.settings import *  # noqa: F401, F403
-else:
+elif django.VERSION < (4, 2):
+    from pwdtk.testproject.dj32.settings import *  # noqa: F401, F403
+elif django.VERSION < (5, ):
     from pwdtk.testproject.dj42.settings import *  # noqa: F401, F403
+else:
+    from pwdtk.testproject.dj52.settings import *  # noqa: F401, F403

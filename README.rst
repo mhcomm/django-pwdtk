@@ -14,8 +14,9 @@ like:
 * regex pattern validation for passwords
 
 This package provides solutions for these problems.
-PWDTK is compatible with python 2.7, and >=3.5
-It is compatible with django 2.2, 3.2 and 4.2
+PWDTK is compatible with python >=3.8
+It is compatible with the django long term support releases 2.2, 3.2,
+4.2 and 5.2
 
 Password Pattern Validation
 --------------------------
