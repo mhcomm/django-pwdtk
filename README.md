@@ -7,16 +7,16 @@
 | pwdtk/\_\_init\_\_.py             |        3 |        1 |     67% |         4 |
 | pwdtk/admin.py                    |        6 |        0 |    100% |           |
 | pwdtk/apps.py                     |        8 |        0 |    100% |           |
-| pwdtk/auth\_backends.py           |       39 |        8 |     79% |21, 24, 48-53 |
+| pwdtk/auth\_backends.py           |       37 |        1 |     97% |        24 |
 | pwdtk/auth\_backends\_settings.py |        4 |        4 |      0% |       1-7 |
 | pwdtk/exceptions.py               |        5 |        0 |    100% |           |
 | pwdtk/helpers.py                  |       27 |       15 |     44% |11-19, 24-30, 40-42 |
 | pwdtk/middlewares.py              |       24 |        5 |     79% |8-10, 26, 49 |
-| pwdtk/models.py                   |       96 |       14 |     85% |20-21, 29, 34-35, 67, 107-109, 123-124, 131, 133, 140 |
+| pwdtk/models.py                   |      105 |        9 |     91% |20-21, 29, 34-35, 67, 149, 151, 158 |
 | pwdtk/settings.py                 |       28 |        0 |    100% |           |
 | pwdtk/signals.py                  |        2 |        0 |    100% |           |
 | pwdtk/validators.py               |       81 |       10 |     88% |39, 52, 79, 82, 109, 147, 175, 203, 238, 258 |
-| **TOTAL**                         |  **323** |   **57** | **82%** |           |
+| **TOTAL**                         |  **330** |   **45** | **86%** |           |
 
 
 ## Setup coverage badge
