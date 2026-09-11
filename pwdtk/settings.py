@@ -65,9 +65,11 @@ PWDTK_IP_FAILURE_LIMIT = 0
 # should ckeck code of https://github.com/tarak/django-password-policies to
 # see, that we use a similiar config.
 
+# whether the password must be changed on first login
+PWDTK_FORCE_RENEW_ON_FIRST_LOGIN = False
+
 # age of passwords before it has to be renewed
 PWDTK_PASSWD_AGE = 30 * 24 * 60 * 60
-
 
 # amount of passwords before and old password can be reused
 PWDTK_PASSWD_HISTORY_LEN = 3
