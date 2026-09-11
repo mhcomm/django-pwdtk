@@ -3,11 +3,7 @@ import logging
 
 from django.http import HttpResponse
 
-try:
-    from django.utils.deprecation import MiddlewareMixin
-except: # noqa E722
-    class MiddlewareMixin(object):
-        pass
+from django.utils.deprecation import MiddlewareMixin
 
 from pwdtk.auth_backends import PwdtkForceRenewException
 from pwdtk.auth_backends import PwdtkLockedException
