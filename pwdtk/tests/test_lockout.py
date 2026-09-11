@@ -20,6 +20,7 @@ from django.test import Client
 from django.test import override_settings
 from django.utils import timezone
 
+from pwdtk.auth_backends import PwdtkBackend
 from pwdtk.exceptions import PwdtkLockedException
 from pwdtk.helpers import PwdtkSettings
 from pwdtk.models import PwdData
@@ -201,6 +202,16 @@ def test_bad_username_without_password_is_ignored():
     client = Client(browser=BROWSER)
 
     assert not client.login(username=UNKNOWN_USER, password="")
+
+    assert not PwdData.objects.exists()
+
+
+@pytest.mark.django_db
+def test_login_with_foreign_credentials_is_ignored():
+    """ the credentials meant for another authentication backend, hence
+        without any user name, leave no trace
+    """
+    assert PwdtkBackend().authenticate(None, token="abc") is None
 
     assert not PwdData.objects.exists()
 
