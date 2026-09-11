@@ -92,6 +92,10 @@ class PasswordHistoryValidatorTest(TestCase):
             validator.validate('oldpassword123', self.user)
         self.assertEqual(raised.exception.messages, ['nope'])
 
+    def test_password_changed_without_user(self):
+        """Django declares the user optional, then there is no history to update."""
+        self.assertIsNone(self.validator.password_changed('newpassword123'))
+
     def test_get_help_text(self):
         """The help text tells how many passwords are remembered."""
         self.assertIn('3', self.validator.get_help_text())
@@ -208,6 +212,10 @@ class PasswordAgeValidatorTest(TestCase):
         with self.assertRaises(ValidationError) as raised:
             validator.validate('oldpassword123', self.user)
         self.assertEqual(raised.exception.messages, ['nope'])
+
+    def test_password_changed_without_user(self):
+        """Django declares the user optional, then there is no age to update."""
+        self.assertIsNone(self.validator.password_changed('newpassword123'))
 
     def test_get_help_text(self):
         """The help text tells that the password must actually change."""
