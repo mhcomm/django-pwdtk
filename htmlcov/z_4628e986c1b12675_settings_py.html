@@ -54,8 +54,8 @@
             </div>
         </aside>
         <h2>
-            <span class="text">28 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">28<span class="text"> run</span></button>
+            <span class="text">29 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">29<span class="text"> run</span></button>
             <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
@@ -147,53 +147,55 @@
     <p class="pln"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t"><span class="com"># should ckeck code of https://github.com/tarak/django-password-policies to</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t"><span class="com"># see, that we use a similiar config.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t"><span class="com"># age of passwords before it has to be renewed</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t"><span class="nam">PWDTK_PASSWD_AGE</span> <span class="op">=</span> <span class="num">30</span> <span class="op">*</span> <span class="num">24</span> <span class="op">*</span> <span class="num">60</span> <span class="op">*</span> <span class="num">60</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t"><span class="com"># whether the password must be changed on first login</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t"><span class="nam">PWDTK_FORCE_RENEW_ON_FIRST_LOGIN</span> <span class="op">=</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t71" href="#t71">71</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t"><span class="com"># amount of passwords before and old password can be reused</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t"><span class="nam">PWDTK_PASSWD_HISTORY_LEN</span> <span class="op">=</span> <span class="num">3</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t"><span class="com"># Regular expression pattern that passwords must match</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t"><span class="nam">PWDTK_PASSWORD_ALLOWED_PATTERN</span> <span class="op">=</span> <span class="str">&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t"><span class="com"># Human-readable explanation of the pattern for user feedback</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t"><span class="nam">PWDTK_PASSWORD_DEFAULT_PATTERN_INFO</span> <span class="op">=</span> <span class="str">&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t"><span class="com"># template to display for password renewal</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t"><span class="nam">PWDTK_PASSWD_CHANGE_VIEW</span> <span class="op">=</span> <span class="str">&quot;password_change&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t"><span class="nam">PWDTK_PASSWD_CHANGE_ALLOWED_PATHS</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t71" href="#t71">71</a></span><span class="t"><span class="com"># age of passwords before it has to be renewed</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t"><span class="nam">PWDTK_PASSWD_AGE</span> <span class="op">=</span> <span class="num">30</span> <span class="op">*</span> <span class="num">24</span> <span class="op">*</span> <span class="num">60</span> <span class="op">*</span> <span class="num">60</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t"><span class="com"># amount of passwords before and old password can be reused</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t"><span class="nam">PWDTK_PASSWD_HISTORY_LEN</span> <span class="op">=</span> <span class="num">3</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t"><span class="com"># Regular expression pattern that passwords must match</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t"><span class="nam">PWDTK_PASSWORD_ALLOWED_PATTERN</span> <span class="op">=</span> <span class="str">&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t"><span class="com"># Human-readable explanation of the pattern for user feedback</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t"><span class="nam">PWDTK_PASSWORD_DEFAULT_PATTERN_INFO</span> <span class="op">=</span> <span class="str">&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t"><span class="com"># template to display for password renewal</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t"><span class="nam">PWDTK_PASSWD_CHANGE_VIEW</span> <span class="op">=</span> <span class="str">&quot;password_change&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t"><span class="com"># Name of the template to be used when a user is locked out</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t"><span class="nam">PWDTK_LOCKOUT_VIEW</span> <span class="op">=</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t"><span class="nam">PWDTK_LOCKOUT_TEMPLATE</span> <span class="op">=</span> <span class="str">&#x27;login/locked_out_simple.html&#x27;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t"><span class="com"># for PWDTK unit testing.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t"><span class="com"># --------------------------</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t"><span class="com"># Url of the admin page</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t"><span class="nam">PWDTK_TEST_ADMIN_URL</span> <span class="op">=</span> <span class="str">&quot;/admin/&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t"><span class="com"># message to be found in contents to detect a bad login</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t"><span class="nam">PWDTK_TEST_LOGIN_FAIL_SUBMSG</span> <span class="op">=</span> <span class="str">b&#x27;Please enter the correct&#x27;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t"><span class="com"># message to be found in contents to detect a locked out user</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t"><span class="nam">PWDTK_TEST_LOCKOUT_SUBMSG</span> <span class="op">=</span> <span class="str">b&#x27;So bad!&#x27;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t"><span class="com"># Password validation settings</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t"><span class="nam">AUTH_PASSWORD_VALIDATORS</span> <span class="op">=</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">    <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t">        <span class="str">&#x27;NAME&#x27;</span><span class="op">:</span> <span class="str">&#x27;pwdtk.validators.PasswordHistoryValidator&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t107" href="#t107">107</a></span><span class="t">    <span class="op">}</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t108" href="#t108">108</a></span><span class="t">    <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t109" href="#t109">109</a></span><span class="t">        <span class="str">&#x27;NAME&#x27;</span><span class="op">:</span> <span class="str">&#x27;pwdtk.validators.RegexPasswordValidator&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">    <span class="op">}</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">    <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">        <span class="str">&#x27;NAME&#x27;</span><span class="op">:</span> <span class="str">&#x27;pwdtk.validators.PasswordAgeValidator&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t113" href="#t113">113</a></span><span class="t">    <span class="op">}</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t114" href="#t114">114</a></span><span class="t"><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t"><span class="nam">PWDTK_PASSWD_CHANGE_ALLOWED_PATHS</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t"><span class="com"># Name of the template to be used when a user is locked out</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t"><span class="nam">PWDTK_LOCKOUT_VIEW</span> <span class="op">=</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t"><span class="nam">PWDTK_LOCKOUT_TEMPLATE</span> <span class="op">=</span> <span class="str">&#x27;login/locked_out_simple.html&#x27;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t"><span class="com"># for PWDTK unit testing.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t"><span class="com"># --------------------------</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t"><span class="com"># Url of the admin page</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t"><span class="nam">PWDTK_TEST_ADMIN_URL</span> <span class="op">=</span> <span class="str">&quot;/admin/&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t"><span class="com"># message to be found in contents to detect a bad login</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t"><span class="nam">PWDTK_TEST_LOGIN_FAIL_SUBMSG</span> <span class="op">=</span> <span class="str">b&#x27;Please enter the correct&#x27;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t"><span class="com"># message to be found in contents to detect a locked out user</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t"><span class="nam">PWDTK_TEST_LOCKOUT_SUBMSG</span> <span class="op">=</span> <span class="str">b&#x27;So bad!&#x27;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t"><span class="com"># Password validation settings</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t"><span class="nam">AUTH_PASSWORD_VALIDATORS</span> <span class="op">=</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t107" href="#t107">107</a></span><span class="t">    <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t108" href="#t108">108</a></span><span class="t">        <span class="str">&#x27;NAME&#x27;</span><span class="op">:</span> <span class="str">&#x27;pwdtk.validators.PasswordHistoryValidator&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t109" href="#t109">109</a></span><span class="t">    <span class="op">}</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">    <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">        <span class="str">&#x27;NAME&#x27;</span><span class="op">:</span> <span class="str">&#x27;pwdtk.validators.RegexPasswordValidator&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">    <span class="op">}</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t113" href="#t113">113</a></span><span class="t">    <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t114" href="#t114">114</a></span><span class="t">        <span class="str">&#x27;NAME&#x27;</span><span class="op">:</span> <span class="str">&#x27;pwdtk.validators.PasswordAgeValidator&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t">    <span class="op">}</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t116" href="#t116">116</a></span><span class="t"><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
