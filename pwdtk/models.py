@@ -108,6 +108,24 @@ class PwdData(models.Model):
         self.save()
         return False
 
+    def unlock(self):
+        """Unlock an account and reset its failed logins.
+
+        Called after each successful login and can be called by integrating
+        tools to lift a lockout before its expiry.
+
+        @returns: whether the account had to be modified
+        """
+        if not (self.failed_logins or self.fail_time or self.locked or
+                self.locked_until):
+            return False
+        self.failed_logins = 0
+        self.fail_time = None
+        self.locked = False
+        self.locked_until = None
+        self.save()
+        return True
+
     @property
     def aware_fail_time(self):
         return make_tz_aware(self.fail_time)

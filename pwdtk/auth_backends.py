@@ -28,12 +28,9 @@ class PwdtkBackend(ModelBackend):
             if pwdtk_data.is_locked():
                 raise PwdtkLockedException(pwdtk_data)
             if user.check_password(password) and self.user_can_authenticate(user):
+                pwdtk_data.unlock()
                 must_renew = pwdtk_data.compute_must_renew()
-                if (pwdtk_data.failed_logins or pwdtk_data.fail_time or
-                   pwdtk_data.locked or must_renew != pwdtk_data.must_renew):
-                    pwdtk_data.failed_logins = 0
-                    pwdtk_data.fail_time = None
-                    pwdtk_data.locked = False
+                if must_renew != pwdtk_data.must_renew:
                     pwdtk_data.must_renew = must_renew
                     pwdtk_data.save()
                 if must_renew and not kwargs.get("ignore_must_renew"):
