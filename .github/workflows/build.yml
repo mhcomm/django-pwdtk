@@ -66,8 +66,9 @@ jobs:
             DJANGO_SETTINGS_MODULE=pwdtk.testproject.${{ matrix.django-version }}.settings pytest
 
   coverage:
-    # a coverage report does not depend on the python nor the django version,
-    # hence it is only measured once, with the most recent ones
+    # a coverage report hardly depends on the python nor the django version,
+    # hence it is measured once with recent ones, then completed with django
+    # 3.2 for the few branches only an older django reaches
     # forked pull requests are skipped, as they cannot report their coverage
     if: >-
       (github.event_name == 'pull_request'
@@ -94,6 +95,12 @@ jobs:
         - name: pytest
           run: |
             DJANGO_SETTINGS_MODULE=pwdtk.testproject.dj42.settings pytest --cov
+        - name: pytest on django 3.2
+          # the JSONField backport and the pytz branch are only reachable
+          # with a django older than 4.0
+          run: |
+            python -m pip install -r requirements/tox_dj32.txt
+            DJANGO_SETTINGS_MODULE=pwdtk.testproject.dj32.settings pytest --cov --cov-append
         - name: report the coverage
           uses: py-cov-action/python-coverage-comment-action@a05be3d2e8a6272d3ef5fb2840ab20368bb2eb71  # v4.3
           with:
