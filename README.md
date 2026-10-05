@@ -2,22 +2,22 @@
 
 [Full report](https://htmlpreview.github.io/?https://github.com/mhcomm/django-pwdtk/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
-| Name                              |    Stmts |     Miss |   Cover |   Missing |
-|---------------------------------- | -------: | -------: | ------: | --------: |
-| pwdtk/\_\_init\_\_.py             |        3 |        1 |     67% |         4 |
-| pwdtk/admin.py                    |        6 |        0 |    100% |           |
-| pwdtk/apps.py                     |       11 |        0 |    100% |           |
-| pwdtk/auth\_backends.py           |       37 |        1 |     97% |        24 |
-| pwdtk/auth\_backends\_settings.py |        4 |        4 |      0% |       1-7 |
-| pwdtk/checks.py                   |       12 |        0 |    100% |           |
-| pwdtk/exceptions.py               |        6 |        0 |    100% |           |
-| pwdtk/helpers.py                  |       27 |       15 |     44% |11-19, 24-30, 40-42 |
-| pwdtk/middlewares.py              |       24 |        5 |     79% |8-10, 26, 49 |
-| pwdtk/models.py                   |      111 |        5 |     95% |21-22, 30, 35-36 |
-| pwdtk/settings.py                 |       29 |        0 |    100% |           |
-| pwdtk/signals.py                  |        2 |        0 |    100% |           |
-| pwdtk/validators.py               |       84 |       10 |     88% |40, 53, 80, 83, 110, 148, 176, 204, 239, 259 |
-| **TOTAL**                         |  **356** |   **41** | **88%** |           |
+| Name                              |    Stmts |     Miss |    Cover |   Missing |
+|---------------------------------- | -------: | -------: | -------: | --------: |
+| pwdtk/\_\_init\_\_.py             |        3 |        0 |     100% |           |
+| pwdtk/admin.py                    |        6 |        0 |     100% |           |
+| pwdtk/apps.py                     |       11 |        0 |     100% |           |
+| pwdtk/auth\_backends.py           |       37 |        0 |     100% |           |
+| pwdtk/auth\_backends\_settings.py |        4 |        0 |     100% |           |
+| pwdtk/checks.py                   |       12 |        0 |     100% |           |
+| pwdtk/exceptions.py               |        6 |        0 |     100% |           |
+| pwdtk/helpers.py                  |       17 |        0 |     100% |           |
+| pwdtk/middlewares.py              |       20 |        0 |     100% |           |
+| pwdtk/models.py                   |      111 |        0 |     100% |           |
+| pwdtk/settings.py                 |       29 |        0 |     100% |           |
+| pwdtk/signals.py                  |        2 |        0 |     100% |           |
+| pwdtk/validators.py               |       84 |        0 |     100% |           |
+| **TOTAL**                         |  **342** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
